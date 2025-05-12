@@ -1,7 +1,6 @@
 #include <cmath> 
 #include <iostream>
-#include <numeric> 
-#include <iostream>
+#include <numeric>
 #include <sstream>
 #include <set>
 #include <tuple>
@@ -10,65 +9,84 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-
-    cout << "argc: " << argc << endl;
-    for(int a = 0; a < argc; a++)
-        cout << argv[a] << " ";
-    cout << endl;
-
-    unsigned int p;
-	unsigned int q;
-	unsigned int b;
-	unsigned int c;
-	unsigned int id_origin;
-	unsigned int id_end;
+    int p;
+	int q;
+	int b;
+	int c;
+	int id_origin;
+	int id_end;
 	
-	set<tuple<unsigned int, unsigned int>> set_valid_pq = {
+	set<tuple<int, int>> set_valid_pq = {
 		{3,3}, {3,4}, {3,5}, {4,3}, {5,3}
 	};
 	
 	
     if(argc == 5)
     {
-		char _;
-        istringstream convert(argv[1]);
-		convert >> _;
-		convert >> p >> q >> b >> c;
-		cout << p << " " << q << " " << b << " " << c << endl;
+		p = stoi(argv[1]);
+		q = stoi(argv[2]);
+		b = stoi(argv[3]);
+		c = stoi(argv[4]);
 		
-		tuple<unsigned int, unsigned int> tuple_pq = {p,q};
+		tuple<int, int> tuple_pq = {p,q};
 		
 		/* Cerchiamo la coppia (p,q), se presente, nel set dei valori validi.
 		   Iteriamo con un iteratore sugli elementi del set e se la tupla (p,q)
 		   non è salvata nel set stampa "Invalid input" */
 		
-		if(auto iter = set_valid_pq.find(tuple_pq); iter != set_valid_pq.end())
-			cerr << "Invalid input" << endl;
-		else 
-			cout << "ok" << endl;
+		if(auto iter = set_valid_pq.find(tuple_pq); iter == set_valid_pq.end())
+			cerr << "Invalid input: error in p,q" << endl;
+		
+		
+		// Controllo sulla validità di b e c secondo le condizioni richieste
+		
+		if(!(b == c || b == 0 || c == 0))
+			cerr << "Invalid input: error in b,c" << endl;
+		
+		// Se b == c o b == 0 o c == 0, non entra nell'if precedente e continua con il codice
+		
+		if(!(b > 0 || c > 0))
+			cerr << "Invalid input: error in b,c" << endl;
 			
         
     }
     else if(argc==7)
 	{
-		char _;
-        istringstream convert(argv[1]);
-		convert >> _;
-		convert >> p >> q >> b >> c >> id_origin >> id_end;
+		p = stoi(argv[1]);
+		q = stoi(argv[2]);
+		b = stoi(argv[3]);
+		c = stoi(argv[4]);
+		id_origin = stoi(argv[5]);
+		id_end = stoi(argv[6]);
 		
-		tuple<unsigned int, unsigned int> tuple_pq = {p,q};
+		tuple<int, int> tuple_pq = {p,q};
 		
 		/* Cerchiamo la coppia (p,q), se presente, nel set dei valori validi.
 		   Iteriamo con un iteratore sugli elementi del set e se la tupla (p,q)
 		   non è salvata nel set stampa "Invalid input" */
 		
-		if(auto iter = set_valid_pq.find(tuple_pq); iter != set_valid_pq.end())
-			cerr << "Invalid input" << endl;
+		if(auto iter = set_valid_pq.find(tuple_pq); iter == set_valid_pq.end())
+			cerr << "Invalid input: error in p,q" << endl;
+		
+		
+		// Controllo sulla validità di b e c secondo le condizioni richieste
+		
+		if(!(b == c || b == 0 || c == 0))
+			cerr << "Invalid input: error in b,c" << endl;
+		
+		// Se b == c o b == 0 o c == 0, non entra nell'if precedente e continua con il codice
+		
+		if(!(b > 0 || c > 0))
+			cerr << "Invalid input: error in b,c" << endl;
+		
+		
+		
+		// DA FARE ANCORA CONTROLLO SU ID_ORIGIN E END CONTROLLANDO CHE SIANO ID DISPONIBILI (ABBIAMO GIA p,q,b,c)
         
     }
 	else
 	{
-        cerr << "Invalid input"  << endl;
+        cerr << "Invalid input: invalid number of elements"  << endl;
 	}
 	
 	return 0;
