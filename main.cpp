@@ -1,11 +1,15 @@
-#include <cmath> 
+#include <cmath>
 #include <iostream>
 #include <numeric>
 #include <sstream>
 #include <set>
 #include <tuple>
+#include "Utils.hpp"
+#include "UCDUtilities.hpp"
+#include "PolyhedralMesh.hpp"
 
 using namespace std;
+using namespace PolyhedralLibrary;
 
 int main(int argc, char *argv[])
 {
@@ -34,19 +38,26 @@ int main(int argc, char *argv[])
 		   Iteriamo con un iteratore sugli elementi del set e se la tupla (p,q)
 		   non è salvata nel set stampa "Invalid input" */
 		
-		if(auto iter = set_valid_pq.find(tuple_pq); iter == set_valid_pq.end())
+		if(auto iter = set_valid_pq.find(tuple_pq); iter == set_valid_pq.end()) {
 			cerr << "Invalid input: error in p,q" << endl;
+			return 1;
+		}
+		
 		
 		
 		// Controllo sulla validità di b e c secondo le condizioni richieste
 		
-		if(!(b == c || b == 0 || c == 0))
+		if(!(b == c || b == 0 || c == 0)) {
 			cerr << "Invalid input: error in b,c" << endl;
+			return 2;
+		}
 		
 		// Se b == c o b == 0 o c == 0, non entra nell'if precedente e continua con il codice
 		
-		if(!(b > 0 || c > 0))
+		if(!(b > 0 || c > 0)){
 			cerr << "Invalid input: error in b,c" << endl;
+			return 3;
+		}
 			
         
     }
@@ -65,19 +76,25 @@ int main(int argc, char *argv[])
 		   Iteriamo con un iteratore sugli elementi del set e se la tupla (p,q)
 		   non è salvata nel set stampa "Invalid input" */
 		
-		if(auto iter = set_valid_pq.find(tuple_pq); iter == set_valid_pq.end())
+		if(auto iter = set_valid_pq.find(tuple_pq); iter == set_valid_pq.end()) {
 			cerr << "Invalid input: error in p,q" << endl;
+			return 4;
+		}
 		
 		
 		// Controllo sulla validità di b e c secondo le condizioni richieste
 		
-		if(!(b == c || b == 0 || c == 0))
+		if(!(b == c || b == 0 || c == 0)) {
 			cerr << "Invalid input: error in b,c" << endl;
+			return 5;
+		}
 		
 		// Se b == c o b == 0 o c == 0, non entra nell'if precedente e continua con il codice
 		
-		if(!(b > 0 || c > 0))
+		if(!(b > 0 || c > 0)) {
 			cerr << "Invalid input: error in b,c" << endl;
+			return 6;
+		}
 		
 		
 		
@@ -87,7 +104,24 @@ int main(int argc, char *argv[])
 	else
 	{
         cerr << "Invalid input: invalid number of elements"  << endl;
+		return 7;
 	}
+	
+	PolyhedralMesh mesh;
+	ChoosePoly(mesh, p, q);
+	for(unsigned int i=0; i <mesh.NumCell0Ds; i++) {
+		for(unsigned int j=0; j <3; j++)
+			cout << mesh.Cell0DsCoordinates(i,j) << " ";
+		cout << endl;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	return 0;
 }

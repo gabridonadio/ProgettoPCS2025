@@ -6,8 +6,8 @@ using namespace std;
 using namespace Eigen;
 
 
-namespace PolygonalLibrary {
-	struct PolygonalMesh
+namespace PolyhedralLibrary {
+	struct PolyhedralMesh
 	{
 		unsigned int NumCell0Ds;
 		unsigned int NumCell1Ds;
