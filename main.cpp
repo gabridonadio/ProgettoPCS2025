@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	}
 	
 	PolyhedralMesh mesh;
-	ChoosePoly(mesh, p, q);
+	BuildPolyhedron(mesh, p, q);
 	for(unsigned int i=0; i <mesh.NumCell0Ds; i++) {
 		for(unsigned int j=0; j <3; j++)
 			cout << mesh.Cell0DsCoordinates(i,j) << " ";

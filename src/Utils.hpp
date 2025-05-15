@@ -5,5 +5,5 @@
 
 namespace PolyhedralLibrary
 {
-	void ChoosePoly(PolyhedralMesh& mesh, int p, int q);
+	void BuildPolyhedron(PolyhedralMesh& mesh, int p, int q);
 }
