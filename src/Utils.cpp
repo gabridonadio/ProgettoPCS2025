@@ -13,7 +13,7 @@ namespace PolyhedralLibrary
 		// tetraedro
 		if(p==3 && q==3)
 		{
-
+			//Cell0Ds
 			mesh.NumCell0Ds = 4;
 			mesh.Cell0DsId.resize(mesh.NumCell0Ds);
 
@@ -34,8 +34,8 @@ namespace PolyhedralLibrary
 			for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)
 				mesh.Cell0DsMarker[1].push_back(mesh.Cell0DsId[i]);
 
-			for(int i = 0; i < mesh.NumCell0Ds; i++)
-				cout << mesh.Cell0DsMarker[1][i] << endl;
+			//for(int i = 0; i < mesh.NumCell0Ds; i++)
+				//cout << mesh.Cell0DsMarker[1][i] << endl;
 
 
 			//cell1Ds
@@ -56,6 +56,9 @@ namespace PolyhedralLibrary
 			1, 3,
 			2, 3;
 
+			for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)
+				mesh.Cell1DsMarker[1].push_back(mesh.Cell1DsId[i]);
+
 			//Cell2Ds
 			mesh.NumCell2Ds = 4;
 
@@ -72,12 +75,13 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsVertices[3] = {1, 3, 2};
 
 			mesh.Cell2DsEdges.resize(mesh.NumCell2Ds);
-			mesh.Cell2DsEdges[0]    = {0, 3, 1};
-			mesh.Cell2DsEdges[1]    = {2, 4, 0};
-			mesh.Cell2DsEdges[2]    = {1, 5, 2};
-			mesh.Cell2DsEdges[3]    = {4, 5, 3};
+			mesh.Cell2DsEdges[0] = {0, 3, 1};
+			mesh.Cell2DsEdges[1] = {2, 4, 0};
+			mesh.Cell2DsEdges[2] = {1, 5, 2};
+			mesh.Cell2DsEdges[3] = {4, 5, 3};
 					
-
+			for(unsigned int i = 0; i < mesh.NumCell2Ds; i++)
+				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
 			
 
 		}
@@ -104,6 +108,9 @@ namespace PolyhedralLibrary
 				-1,0,0,
 				0,-1,0,
 				0,0,-1;	
+
+			for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)
+				mesh.Cell0DsMarker[1].push_back(mesh.Cell0DsId[i]);
 			
 			// ce
 			
@@ -129,6 +136,9 @@ namespace PolyhedralLibrary
 			2, 3,
 			3, 4,
 			4, 1;
+
+			for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)
+				mesh.Cell1DsMarker[1].push_back(mesh.Cell1DsId[i]);
 
 			//Cell2Ds
 			mesh.NumCell2Ds = 8;
@@ -159,7 +169,8 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsEdges[6] = {7,10, 6};
 			mesh.Cell2DsEdges[7] = {4,11, 7};
 
-
+			for(unsigned int i = 0; i < mesh.NumCell2Ds; i++)
+				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
 		}
 		
 		// nel caso di icosaedro o dodecaedro li tratto nello stesso modo, cioè come un icosaedro
@@ -190,6 +201,9 @@ namespace PolyhedralLibrary
 				-1,-phi,0;	
 				
 			mesh.Cell0DsCoordinates /= sqrt(1+phi*phi);
+
+			for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)
+				mesh.Cell0DsMarker[1].push_back(mesh.Cell0DsId[i]);
 
 			// cell1Ds
 
@@ -233,6 +247,9 @@ namespace PolyhedralLibrary
 			10,  7,
 			8,  4;
 
+			for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)
+				mesh.Cell1DsMarker[1].push_back(mesh.Cell1DsId[i]);
+
 			//Cell2Ds
 			mesh.NumCell2Ds = 20;
 
@@ -264,7 +281,6 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsVertices[18] = {11,10,8};
 			mesh.Cell2DsVertices[19] = {10, 7,8};
 
-			
 			mesh.Cell2DsEdges.resize(mesh.NumCell2Ds);
 			mesh.Cell2DsEdges[0] = {0, 4, 1};
 			mesh.Cell2DsEdges[1] = {1, 7,11};
@@ -287,7 +303,8 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsEdges[18] = {23,27,21};
 			mesh.Cell2DsEdges[19] = {27,18,19};
 
-
+			for(unsigned int i = 0; i < mesh.NumCell2Ds; i++)
+				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
 		}
 		
 		
