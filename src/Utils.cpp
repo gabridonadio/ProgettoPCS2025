@@ -285,12 +285,67 @@ namespace PolyhedralLibrary
 				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
 		}
 	}
-	/*
-	bool BuildCell0Ds(PoliedralMesh& mesh, int p, int q, int b, int c)
+	
+	// Suppongo di aver già controllato che uno tra b e c sia uguale a 0 e l'altro >= 1
+	void Triangulation_I(PolyhedralMesh& mesh, int b, int c)
 	{
-		mesh.Cell0DsId.reserve(mesh.NumCell0Ds);
 		
-		mesh.Cell0DsCoordinates = Eigen::MatrixXd::Zero(3, mesh.NumCell0Ds);
+		mesh.Cell0DsId.resize();
+		mesh.Cell1DsId.resize();
+		mesh.Cell2DsId.resize();
 		
-	}*/
+		mesh.Cell0DsCoordinates.conservativeResize();
+		mesh.Cell1DsExtrema.conservativeResize();
+		
+		mesh.Cell2DsVertices.resize();
+		mesh.Cell2DsEdges.resize();
+		
+		
+		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
+		{
+			for(unsigned int vertex = 0; vertex < 3; vertex++)
+			{
+				// Controllo che il lato non sia ancora stato diviso
+				// Controllo che esista la chiave 2 per i lati già divisi
+				key = 2;
+				// Se c'è la key allora entra nell'if
+				if (auto Cell1DsMarker.find(key) != Cell1DsMarker.end()) {
+					
+					// Cerco il lato di ID Cell2DsEdges[face][vertex] nella lista associata al marker key
+					auto iter_2DMark = find(Cell1DsMarker[key].begin(), Cell1DsMarker[key].end(), Cell2DsEdges[face][vertex]);
+
+					if (iter_2DMark == Cell1DsMarker[key].end()) {
+						// Nella lista associata al marker key non c'è il lato cercato, cioè il lato non è ancora stato diviso
+						// DIVIDO IL LATO
+						vertex_origin_ID = Cell2DsVertices[face][vertex];
+						vertex_end_ID = Cell2DsVertices[face][(vertex+1)%3];
+						
+						x_origin = Cell0DsCoordinates(vertex_origin_ID, 0);
+						y_origin = Cell0DsCoordinates(vertex_origin_ID, 1);
+						z_origin = Cell0DsCoordinates(vertex_origin_ID, 2);
+						
+						x_end = Cell0DsCoordinates(vertex_end_ID, 0);
+						y_end = Cell0DsCoordinates(vertex_end_ID, 1);
+						z_end = Cell0DsCoordinates(vertex_end_ID, 2); 
+						
+						Eigen::Vector3d vector_edge((x_origin - x_end), (y_origin - y_end), (z_origin - z_end));
+						vector_edge.normalize();
+						
+						// Creo i punti della triangolazione sui lati principali
+						for(unsigned int i = 1; i < b-1; i++) 
+						{
+							Cell0DsCoordinates[]
+							
+							
+							// metodo Joana: salvare ora che faccio divisione del lato i vertici in una struttura ordinata
+							// e poi collegare primo con primo, ultimo con primo ecc ecc a seconda del caso
+						}
+						
+						
+					}
+				}
+
+			}
+		}
+	}
 }
