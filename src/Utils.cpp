@@ -287,6 +287,7 @@ namespace PolyhedralLibrary
 	}
 	
 	// Suppongo di aver già controllato che uno tra b e c sia uguale a 0 e l'altro >= 1
+	// Triangolazione caso b = 0 oppure c = 0
 	void Triangulation_I(PolyhedralMesh& mesh, int b, int c)
 	{
 		
@@ -300,42 +301,59 @@ namespace PolyhedralLibrary
 		mesh.Cell2DsVertices.resize();
 		mesh.Cell2DsEdges.resize();
 		
+		// salvare le 3 direzioni del triangolo
+		Eigen::Matrix3i matrix_edges;
+		unsigned int n = mesh.NumCell0DS;
+
+		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
+		array<array<unsigned int, 3>, b-1> id_vertices_suddivisione{};
+		map<unsigned int, vector<unsigned int>> vertices_per_face;
 		
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
+			
 			for(unsigned int vertex = 0; vertex < 3; vertex++)
 			{
 				// Controllo che il lato non sia ancora stato diviso
 				// Controllo che esista la chiave 2 per i lati già divisi
 				key = 2;
 				// Se c'è la key allora entra nell'if
-				if (auto Cell1DsMarker.find(key) != Cell1DsMarker.end()) {
+				if (auto mesh.Cell1DsMarker.find(key) != mesh.Cell1DsMarker.end()) {
 					
 					// Cerco il lato di ID Cell2DsEdges[face][vertex] nella lista associata al marker key
-					auto iter_2DMark = find(Cell1DsMarker[key].begin(), Cell1DsMarker[key].end(), Cell2DsEdges[face][vertex]);
+					auto iter_2DMark = find(mesh.Cell1DsMarker[key].begin(), mesh.Cell1DsMarker[key].end(), mesh.Cell2DsEdges[face][vertex]);
 
-					if (iter_2DMark == Cell1DsMarker[key].end()) {
+					if (iter_2DMark == mesh.Cell1DsMarker[key].end()) {
 						// Nella lista associata al marker key non c'è il lato cercato, cioè il lato non è ancora stato diviso
 						// DIVIDO IL LATO
-						vertex_origin_ID = Cell2DsVertices[face][vertex];
-						vertex_end_ID = Cell2DsVertices[face][(vertex+1)%3];
+						vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
+						vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
 						
-						x_origin = Cell0DsCoordinates(vertex_origin_ID, 0);
-						y_origin = Cell0DsCoordinates(vertex_origin_ID, 1);
-						z_origin = Cell0DsCoordinates(vertex_origin_ID, 2);
+						x_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 0);
+						y_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 1);
+						z_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 2);
 						
-						x_end = Cell0DsCoordinates(vertex_end_ID, 0);
-						y_end = Cell0DsCoordinates(vertex_end_ID, 1);
-						z_end = Cell0DsCoordinates(vertex_end_ID, 2); 
+						x_end = mesh.Cell0DsCoordinates(vertex_end_ID, 0);
+						y_end = mesh.Cell0DsCoordinates(vertex_end_ID, 1);
+						z_end = mesh.Cell0DsCoordinates(vertex_end_ID, 2); 
 						
-						Eigen::Vector3d vector_edge((x_origin - x_end), (y_origin - y_end), (z_origin - z_end));
-						vector_edge.normalize();
-						
+						Eigen::Vector3d vector_edge;
+						vector_edge << x_origin - x_end,
+									   y_origin - y_end, 
+									   z_origin - z_end;
+						vector_edge.normalize(); // vettore direzione normalizzato
+						matrix_edges.row(vertex) = vector_edge;
 						// Creo i punti della triangolazione sui lati principali
 						for(unsigned int i = 1; i < b-1; i++) 
 						{
-							Cell0DsCoordinates[]
-							
+							//Eigen::Vector3d vector_coordinates((x_origine
+							//mesh.Cell0DsCoordinates.row(n) = vector_coordinates;
+							mesh.Cell0DsCoordinates(n, 0) = x_origin + vector_edge(0)*i;
+							mesh.Cell0DsCoordinates(n, 1) = y_origin + vector_edge(1)*i;
+							mesh.Cell0DsCoordinates(n, 2) = z_origin + vector_edge(2)*i;
+							mesh.Cell0DsId.push_back(n);
+							id_vertices_suddivisione[vertex][mesh.Cell0DsId[n]];
+							n++;
 							
 							// metodo Joana: salvare ora che faccio divisione del lato i vertici in una struttura ordinata
 							// e poi collegare primo con primo, ultimo con primo ecc ecc a seconda del caso
@@ -345,6 +363,22 @@ namespace PolyhedralLibrary
 					}
 				}
 
+			}
+			
+			vertices_per_face[0] = {mesh.Cell2DsVertices[face][0], matrix_edges.row(0), mesh.Cell2DsVertices[face][1]};
+			
+			// itero sull'altezza 
+			for(unsigned int j = b-2; j >= 0; j--)
+			{
+				// itero sulle righe
+				for(unsigned int k = 1; k < j; k++)
+				{
+					mesh.Cell0DsCoordinates(n, 0) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 0)*k;
+					mesh.Cell0DsCoordinates(n, 1) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 1)*k;
+					mesh.Cell0DsCoordinates(n, 2) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 2)*k;
+					mesh.Cell0DsId.push_back(n);
+					n++;
+				}
 			}
 		}
 	}
