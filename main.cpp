@@ -109,7 +109,9 @@ int main(int argc, char *argv[])
 	
 	PolyhedralMesh mesh;
 	BuildPolyhedron(mesh, p, q);
-	for(unsigned int i=0; i <mesh.NumCell0Ds; i++) {
+	
+	Triangulation_I(mesh, b, c);
+	for(unsigned int i=0; i < mesh.NumCell0Ds; i++) {
 		for(unsigned int j=0; j <3; j++)
 			cout << mesh.Cell0DsCoordinates(i,j) << " ";
 		cout << endl;

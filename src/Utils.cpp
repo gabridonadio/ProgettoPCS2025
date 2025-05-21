@@ -288,35 +288,46 @@ namespace PolyhedralLibrary
 	
 	// Suppongo di aver già controllato che uno tra b e c sia uguale a 0 e l'altro >= 1
 	// Triangolazione caso b = 0 oppure c = 0
-	void Triangulation_I(PolyhedralMesh& mesh, int b, int c)
+	void Triangulation_I(PolyhedralMesh& mesh, const int b, const int c)
 	{
 		
-		mesh.Cell0DsId.resize();
-		mesh.Cell1DsId.resize();
-		mesh.Cell2DsId.resize();
+		mesh.Cell0DsId.reserve(100000);
+		//mesh.Cell1DsId.reserve();
+		//mesh.Cell2DsId.reserve();
 		
-		mesh.Cell0DsCoordinates.conservativeResize();
-		mesh.Cell1DsExtrema.conservativeResize();
+		mesh.Cell0DsCoordinates.conservativeResize(100000, 3);
+		//mesh.Cell1DsExtrema.conservativeResize();
 		
-		mesh.Cell2DsVertices.resize();
-		mesh.Cell2DsEdges.resize();
+		//mesh.Cell2DsVertices.resize();
+		//mesh.Cell2DsEdges.resize();
 		
-		// salvare le 3 direzioni del triangolo
-		Eigen::Matrix3i matrix_edges;
-		unsigned int n = mesh.NumCell0DS;
 
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
-		array<array<unsigned int, 3>, b-1> id_vertices_suddivisione{};
+		array<vector<unsigned int>, 3> id_vertices_suddivisione;
+		for (auto& vec : id_vertices_suddivisione) {
+			vec.reserve(b-1);
+		}
+		
 		map<unsigned int, vector<unsigned int>> vertices_per_face;
+		unsigned int n = mesh.NumCell0Ds;
 		
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
+			// salvare le 3 direzioni del triangolo
+			Eigen::Matrix3d matrix_edges;
+			
+			// puzza
+			for (auto& vec : id_vertices_suddivisione) {
+				vec.clear();
+			}
+			vertices_per_face.clear();
+
 			
 			for(unsigned int vertex = 0; vertex < 3; vertex++)
 			{
 				// Controllo che il lato non sia ancora stato diviso
 				// Controllo che esista la chiave 2 per i lati già divisi
-				key = 2;
+				/*key = 2;
 				// Se c'è la key allora entra nell'if
 				if (auto mesh.Cell1DsMarker.find(key) != mesh.Cell1DsMarker.end()) {
 					
@@ -325,29 +336,28 @@ namespace PolyhedralLibrary
 
 					if (iter_2DMark == mesh.Cell1DsMarker[key].end()) {
 						// Nella lista associata al marker key non c'è il lato cercato, cioè il lato non è ancora stato diviso
+						*/
 						// DIVIDO IL LATO
-						vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
-						vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
+						unsigned int vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
+						unsigned int vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
 						
-						x_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 0);
-						y_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 1);
-						z_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 2);
+						double x_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 0);
+						double y_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 1);
+						double z_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 2);
 						
-						x_end = mesh.Cell0DsCoordinates(vertex_end_ID, 0);
-						y_end = mesh.Cell0DsCoordinates(vertex_end_ID, 1);
-						z_end = mesh.Cell0DsCoordinates(vertex_end_ID, 2); 
+						double x_end = mesh.Cell0DsCoordinates(vertex_end_ID, 0);
+						double y_end = mesh.Cell0DsCoordinates(vertex_end_ID, 1);
+						double z_end = mesh.Cell0DsCoordinates(vertex_end_ID, 2); 
 						
 						Eigen::Vector3d vector_edge;
-						vector_edge << x_origin - x_end,
-									   y_origin - y_end, 
-									   z_origin - z_end;
-						vector_edge.normalize(); // vettore direzione normalizzato
+						vector_edge << x_end - x_origin,
+									   y_end - y_origin, 
+									   z_end - z_origin;
+						vector_edge /= b; // vettore direzione normalizzato
 						matrix_edges.row(vertex) = vector_edge;
 						// Creo i punti della triangolazione sui lati principali
-						for(unsigned int i = 1; i < b-1; i++) 
+						for(unsigned int i = 1; i < b; i++) 
 						{
-							//Eigen::Vector3d vector_coordinates((x_origine
-							//mesh.Cell0DsCoordinates.row(n) = vector_coordinates;
 							mesh.Cell0DsCoordinates(n, 0) = x_origin + vector_edge(0)*i;
 							mesh.Cell0DsCoordinates(n, 1) = y_origin + vector_edge(1)*i;
 							mesh.Cell0DsCoordinates(n, 2) = z_origin + vector_edge(2)*i;
@@ -360,26 +370,47 @@ namespace PolyhedralLibrary
 						}
 						
 						
-					}
-				}
+					//}
+				//}
 
 			}
 			
-			vertices_per_face[0] = {mesh.Cell2DsVertices[face][0], matrix_edges.row(0), mesh.Cell2DsVertices[face][1]};
+			// popolo il livello 0 della mappa con tutti i vertici della faccia
+			vertices_per_face[0].reserve(b+1);
+			vertices_per_face[0].push_back(mesh.Cell2DsVertices[face][0]);
+			for(auto iter = id_vertices_suddivisione[0].begin(); iter != id_vertices_suddivisione[0].end(); iter++)
+				vertices_per_face[0].push_back(*iter);
+			vertices_per_face[0].push_back(mesh.Cell2DsVertices[face][1]);
 			
+			// trovo i vertici interni della triangolazione
 			// itero sull'altezza 
-			for(unsigned int j = b-2; j >= 0; j--)
+			for(unsigned int j = 0; j < b-1 ; j++)
 			{
+				vertices_per_face[j+1].reserve(b-j);
+				vertices_per_face[j+1].push_back(id_vertices_suddivisione[2][b-2-j]);
 				// itero sulle righe
-				for(unsigned int k = 1; k < j; k++)
+				for(unsigned int k = b-2-j; k > 0; k--)
 				{
 					mesh.Cell0DsCoordinates(n, 0) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 0)*k;
-					mesh.Cell0DsCoordinates(n, 1) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 1)*k;
-					mesh.Cell0DsCoordinates(n, 2) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 2)*k;
+					mesh.Cell0DsCoordinates(n, 1) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 1) - matrix_edges(0, 1)*k;
+					mesh.Cell0DsCoordinates(n, 2) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 2) - matrix_edges(0, 2)*k;
 					mesh.Cell0DsId.push_back(n);
+					vertices_per_face[j+1].push_back(n);
 					n++;
 				}
+				
+				vertices_per_face[j+1].push_back(id_vertices_suddivisione[1][j]);
 			}
+			
+			vertices_per_face[b].reserve(1);
+			vertices_per_face[b].push_back(mesh.Cell2DsVertices[face][2]);
+			
+			// creazione lati e facce triangolazione
+			
+			
+			
 		}
+		cout << n << endl;
+		mesh.NumCell0Ds = n-1;
 	}
 }
