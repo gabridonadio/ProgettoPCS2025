@@ -9,7 +9,7 @@ namespace PolyhedralLibrary
 {
 	void BuildPolyhedron(PolyhedralMesh& mesh, int p, int q)
 	{	
-		const double phi = (1+sqrt(5))/2; 
+		const double phi = (1.0+sqrt(5.0))/2.0; 
 		// tetraedro
 		if(p==3 && q==3)
 		{
@@ -170,18 +170,18 @@ namespace PolyhedralLibrary
 
 			mesh.Cell0DsCoordinates = Eigen::MatrixXd::Zero(mesh.NumCell0Ds, 3); //Salvataggio delle coordinate
 			mesh.Cell0DsCoordinates <<
-				0,   1,  phi,
-				0,  -1,  phi,
-			 -phi,   0,    1,
-			   -1, phi,    0,
-				1, phi,    0,
-			  phi,   0,    1,
-				1,-phi,    0,
-			  phi,   0,   -1,
-				0,   1, -phi,
-			 -phi,   0,   -1,
-				0,  -1, -phi,
-			   -1, -phi,   0;	
+				 0,  1,  phi,  
+				 0, -1,  phi,  
+				-phi, 0,   1,  
+				-1,  phi, 0,   
+				 1,  phi, 0,   
+				 phi, 0,   1,  
+				 1, -phi, 0,   
+				 phi, 0,  -1,  
+				 0,   1, -phi, 
+				-phi, 0,  -1,  
+				 0,  -1, -phi, 
+				-1, -phi, 0; 
 				
 			mesh.Cell0DsCoordinates /= sqrt(1+phi*phi);
 
@@ -197,35 +197,36 @@ namespace PolyhedralLibrary
 
 			mesh.Cell1DsExtrema = Eigen::MatrixXi::Zero(mesh.NumCell1Ds,2); //Salvataggio degli estremi dei lati
 			mesh.Cell1DsExtrema << 
-			0,   1,
-			0,   2,
-			0,   4,
-			0,   5,
-			1,   2,
-			1,   6,
-			1,   5,
-			2,   3,
-			2,   9,
-			3,   4,
-			3,   9,
-			3,   8,
-			4,   8,
-			4,   5,
-			5,   7,
-			6,   7,
-			6,  10,
-			6,   1,
-			7,  10,
-			7,   5,
-			8,   9,
-			8,  11,
-			9,  11,
-			10, 11,
-			10,  6,
-			11,  2,
-			11,  3,
-			10,  7,
-			8,   4;
+			0, 1,   
+			0, 2,   
+			0, 3,   
+			0, 4,   
+			0, 5,   
+			1, 2,   
+			1, 5,   
+			1, 6,   
+			1,11,   
+			2, 3,   
+			2, 9,   
+			2,11,   
+			3, 4,   
+			3, 8,   
+			3, 9,   
+			4, 5,   
+			4, 8,   
+			4, 7,   
+			5, 6,   
+			5, 7,   
+			6,10,   
+			6, 7,   
+			7, 8,   
+			7,10,   
+			8, 9,   
+			8,10,   
+			9,10,   
+			9,11,   
+			11, 6,   
+			11,10;
 
 			for(unsigned int i = 0; i < mesh.NumCell1Ds; i++) //Salvataggio dei marker
 				mesh.Cell1DsMarker[1].push_back(mesh.Cell1DsId[i]);
@@ -243,22 +244,24 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsVertices[2] = {0, 3, 4};
 			mesh.Cell2DsVertices[3] = {0, 4, 5};
 			mesh.Cell2DsVertices[4] = {0, 5, 1};
-			mesh.Cell2DsVertices[5] = {1, 6, 2};
-			mesh.Cell2DsVertices[6] = {2, 6, 9};
-			mesh.Cell2DsVertices[7] = {2, 9, 3};
-			mesh.Cell2DsVertices[8] = {3, 9, 8};
-			mesh.Cell2DsVertices[9] = {3, 8, 4};
-			mesh.Cell2DsVertices[10] = {4, 8, 5};
-			mesh.Cell2DsVertices[11] = {5, 8, 7};
-			mesh.Cell2DsVertices[12] = {5, 7, 1};
-			mesh.Cell2DsVertices[13] = {1, 7, 6};
-			mesh.Cell2DsVertices[14] = {6,10, 9};
-			mesh.Cell2DsVertices[15] = {9,10,11};
-			mesh.Cell2DsVertices[16] = {9,11, 3};
-			mesh.Cell2DsVertices[17] = {11,8, 3};
-			mesh.Cell2DsVertices[18] = {11,10,8};
-			mesh.Cell2DsVertices[19] = {10, 7,8};
+			mesh.Cell2DsVertices[5] = {1, 5, 6};
+			mesh.Cell2DsVertices[6] = {1, 6, 11};
+			mesh.Cell2DsVertices[7] = {2, 1, 11};
+			mesh.Cell2DsVertices[8] = {2, 11, 9};
+			mesh.Cell2DsVertices[9] = {3, 2, 9};
+			mesh.Cell2DsVertices[10] = {3, 9, 8};
+			mesh.Cell2DsVertices[11] = {3, 8, 4};
+			mesh.Cell2DsVertices[12] = {4, 8, 7};
+			mesh.Cell2DsVertices[13] = {4, 7, 5};
+			mesh.Cell2DsVertices[14] = {5,7, 6};
+			mesh.Cell2DsVertices[15] = {6,7,10};
+			mesh.Cell2DsVertices[16] = {6,10, 11};
+			mesh.Cell2DsVertices[17] = {7,10, 8};
+			mesh.Cell2DsVertices[18] = {8,10,9};
+			mesh.Cell2DsVertices[19] = {9, 10,11};
 
+
+			// DA CAMBIARE
 			mesh.Cell2DsEdges.resize(mesh.NumCell2Ds); //Salvataggio dei lati di ogni faccia
 			mesh.Cell2DsEdges[0] = {0, 4, 1};
 			mesh.Cell2DsEdges[1] = {1, 7,11};
@@ -295,7 +298,7 @@ namespace PolyhedralLibrary
 		//mesh.Cell1DsId.reserve();
 		//mesh.Cell2DsId.reserve();
 		
-		mesh.Cell0DsCoordinates.conservativeResize(100000, 3);
+		mesh.Cell0DsCoordinates.conservativeResize(10000, Eigen::NoChange);
 		//mesh.Cell1DsExtrema.conservativeResize();
 		
 		//mesh.Cell2DsVertices.resize();
@@ -305,7 +308,7 @@ namespace PolyhedralLibrary
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
 		array<vector<unsigned int>, 3> id_vertices_suddivisione;
 		for (auto& vec : id_vertices_suddivisione) {
-			vec.reserve(b-1);
+			vec.resize(b-1);
 		}
 		
 		map<unsigned int, vector<unsigned int>> vertices_per_face;
@@ -338,6 +341,7 @@ namespace PolyhedralLibrary
 						// Nella lista associata al marker key non c'è il lato cercato, cioè il lato non è ancora stato diviso
 						*/
 						// DIVIDO IL LATO
+						cout << "i" << endl;
 						unsigned int vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
 						unsigned int vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
 						
@@ -362,9 +366,9 @@ namespace PolyhedralLibrary
 							mesh.Cell0DsCoordinates(n, 1) = y_origin + vector_edge(1)*i;
 							mesh.Cell0DsCoordinates(n, 2) = z_origin + vector_edge(2)*i;
 							mesh.Cell0DsId.push_back(n);
-							id_vertices_suddivisione[vertex][mesh.Cell0DsId[n]];
+							id_vertices_suddivisione[vertex][i-1] = n;
 							n++;
-							
+							cout << i << endl;
 							// metodo Joana: salvare ora che faccio divisione del lato i vertici in una struttura ordinata
 							// e poi collegare primo con primo, ultimo con primo ecc ecc a seconda del caso
 						}
@@ -386,16 +390,27 @@ namespace PolyhedralLibrary
 			// itero sull'altezza 
 			for(unsigned int j = 0; j < b-1 ; j++)
 			{
+				cout << "j" << endl;
+				cout << j << endl;
 				vertices_per_face[j+1].reserve(b-j);
 				vertices_per_face[j+1].push_back(id_vertices_suddivisione[2][b-2-j]);
 				// itero sulle righe
 				for(unsigned int k = b-2-j; k > 0; k--)
 				{
+					cout << "k" << endl;
+					cout << k << endl;
+					cout << mesh.Cell0DsCoordinates(n, 0) << endl;
+					cout << id_vertices_suddivisione[1][j] << endl;
 					mesh.Cell0DsCoordinates(n, 0) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 0)*k;
+					cout<< "pass 1" << endl;
 					mesh.Cell0DsCoordinates(n, 1) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 1) - matrix_edges(0, 1)*k;
+					cout<< "pass 2" << endl;
 					mesh.Cell0DsCoordinates(n, 2) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 2) - matrix_edges(0, 2)*k;
+					cout<< "pass 3" << endl;
 					mesh.Cell0DsId.push_back(n);
+					cout<< "pass 4" << endl;
 					vertices_per_face[j+1].push_back(n);
+					cout<< "pass 5" << endl;
 					n++;
 				}
 				
