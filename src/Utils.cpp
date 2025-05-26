@@ -52,9 +52,6 @@ namespace PolyhedralLibrary
 				1, 3,
 				2, 3;
 
-			for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)  //Salvataggio dei marker 
-				mesh.Cell1DsMarker[1].push_back(mesh.Cell1DsId[i]);
-
 			//Cell2Ds
 			mesh.NumCell2Ds = 4;
 
@@ -122,9 +119,6 @@ namespace PolyhedralLibrary
 				2, 3,
 				3, 4,
 				4, 1;
-
-			for(unsigned int i = 0; i < mesh.NumCell1Ds; i++) //Salvataggio dei marker
-				mesh.Cell1DsMarker[1].push_back(mesh.Cell1DsId[i]); 
 
 			//Cell2Ds
 			mesh.NumCell2Ds = 8;
@@ -228,9 +222,6 @@ namespace PolyhedralLibrary
 			11, 6,   
 			11,10;
 
-			for(unsigned int i = 0; i < mesh.NumCell1Ds; i++) //Salvataggio dei marker
-				mesh.Cell1DsMarker[1].push_back(mesh.Cell1DsId[i]);
-
 			//Cell2Ds
 			mesh.NumCell2Ds = 20;
 
@@ -295,14 +286,14 @@ namespace PolyhedralLibrary
 	{
 		
 		mesh.Cell0DsId.reserve(100000);
-		//mesh.Cell1DsId.reserve();
-		//mesh.Cell2DsId.reserve();
+		mesh.Cell1DsId.reserve(100000);
+		mesh.Cell2DsId.reserve(100000);
 		
 		mesh.Cell0DsCoordinates.conservativeResize(10000, Eigen::NoChange);
-		//mesh.Cell1DsExtrema.conservativeResize();
+		mesh.Cell1DsExtrema.conservativeResize(10000, Eigen::NoChange);
 		
-		//mesh.Cell2DsVertices.resize();
-		//mesh.Cell2DsEdges.resize();
+		mesh.Cell2DsVertices.reserve(10000);
+		mesh.Cell2DsEdges.reserve(10000);
 		
 
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
@@ -313,6 +304,8 @@ namespace PolyhedralLibrary
 		
 		map<unsigned int, vector<unsigned int>> vertices_per_face;
 		unsigned int n = mesh.NumCell0Ds;
+		unsigned int m = mesh.NumCell1Ds;	// usato nella triangolazione
+		unsigned int f = mesh.NumCell2Ds;	// usato nella triangolazione
 		
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
@@ -360,18 +353,50 @@ namespace PolyhedralLibrary
 						vector_edge /= b; // vettore direzione normalizzato
 						matrix_edges.row(vertex) = vector_edge;
 						// Creo i punti della triangolazione sui lati principali
-						for(unsigned int i = 1; i < b; i++) 
-						{
-							mesh.Cell0DsCoordinates(n, 0) = x_origin + vector_edge(0)*i;
-							mesh.Cell0DsCoordinates(n, 1) = y_origin + vector_edge(1)*i;
-							mesh.Cell0DsCoordinates(n, 2) = z_origin + vector_edge(2)*i;
-							mesh.Cell0DsId.push_back(n);
-							id_vertices_suddivisione[vertex][i-1] = n;
-							n++;
-							cout << i << endl;
-							// metodo Joana: salvare ora che faccio divisione del lato i vertici in una struttura ordinata
-							// e poi collegare primo con primo, ultimo con primo ecc ecc a seconda del caso
+						// Cerco il lato di ID Cell2DsEdges[face][vertex] nel vettore associato al marker 2
+						auto iter_2DMark = find(mesh.Cell1DsMarker[2].begin(), mesh.Cell1DsMarker[2].end(), mesh.Cell2DsEdges[face][vertex]);
+						// iter_2DMark != mesh.Cell1DsMarker[2].end()
+						if (iter_2DMark != mesh.Cell1DsMarker[2].end()){
+							for(unsigned int i = 1; i < b; i++) 
+							{
+								double x_sudd = x_origin + vector_edge(0)*i;
+								double y_sudd = y_origin + vector_edge(1)*i;
+								double z_sudd = z_origin + vector_edge(2)*i;
+								
+								bool found = false;
+								unsigned int ind = 0;
+								
+								// recupero gli id dei vertici della suddivisone dei lati principali
+								unsigned int id_found;
+								while(not found){
+									if(abs(mesh.Cell0DsCoordinates(ind,0)-x_sudd) < 1e-12 && abs(mesh.Cell0DsCoordinates(ind,1)-y_sudd) < 1e-12 && abs(mesh.Cell0DsCoordinates(ind,2)-z_sudd) < 1e-12) {
+										id_found = mesh.Cell0DsId[ind];
+										found = true;
+									}
+									ind++;
+								}
+								id_vertices_suddivisione[vertex][i-1] = id_found;
+							}
+								
 						}
+						else{
+							for(unsigned int i = 1; i < b; i++) 
+							{
+								mesh.Cell0DsCoordinates(n, 0) = x_origin + vector_edge(0)*i;
+								mesh.Cell0DsCoordinates(n, 1) = y_origin + vector_edge(1)*i;
+								mesh.Cell0DsCoordinates(n, 2) = z_origin + vector_edge(2)*i;
+								mesh.Cell0DsId.push_back(n);
+								id_vertices_suddivisione[vertex][i-1] = n;
+								n++;
+								cout << i << endl;
+								// metodo Joana: salvare ora che faccio divisione del lato i vertici in una struttura ordinata
+								// e poi collegare primo con primo, ultimo con primo ecc ecc a seconda del caso
+							}
+							mesh.Cell1DsMarker[2].push_back(mesh.Cell2DsEdges[face][vertex]);
+						}
+						
+							
+							
 						
 						
 					//}
@@ -421,11 +446,55 @@ namespace PolyhedralLibrary
 			vertices_per_face[b].push_back(mesh.Cell2DsVertices[face][2]);
 			
 			// creazione lati e facce triangolazione
+			// itero sulla base
+			for(unsigned int j = 0; j < b; j++)
+			{
+				// itero sull'altezza
+				for(unsigned int liv = 0; liv < b-j; liv++)
+				{
+					cout << "m " << m << endl;
+					unsigned int vert_0 = vertices_per_face[liv][j];
+					unsigned int vert_1 = vertices_per_face[liv][j+1];
+					unsigned int vert_2 = vertices_per_face[liv+1][j];
+					
+					
+					// memorizzazione lati
+					mesh.Cell1DsExtrema(m, 0) = vert_0;
+					mesh.Cell1DsExtrema(m, 1) = vert_1;
+					unsigned int edge_0 = m;
+					mesh.Cell1DsId.push_back(edge_0);
+					m++;
+					mesh.Cell1DsExtrema(m, 0) = vert_1;
+					mesh.Cell1DsExtrema(m, 1) = vert_2;
+					unsigned int edge_1 = m;
+					mesh.Cell1DsId.push_back(edge_1);
+					m++;
+					mesh.Cell1DsExtrema(m, 0) = vert_2;
+					mesh.Cell1DsExtrema(m, 1) = vert_0;
+					unsigned int edge_2 = m;
+					mesh.Cell1DsId.push_back(edge_2);
+					m++;
+					
+					// memorizzazione faccia con lati appena creati
+					mesh.Cell2DsVertices[m] = {vert_0, vert_1, vert_2};
+					mesh.Cell2DsEdges[m] = {edge_0, edge_1, edge_2};
+					mesh.Cell2DsId.push_back(f);
+					f++;
+					
+					
+				}
+			}
 			
-			
+			for(unsigned int i =0; i < b+1; i++){
+				cout << "controllo " << i << " " << endl;
+				for(unsigned int j = 0; j <b+1-i; j++)
+					cout << vertices_per_face[i][j] << ", " << endl; 
+			}
 			
 		}
 		cout << n << endl;
 		mesh.NumCell0Ds = n-1;
+		mesh.NumCell1Ds = m-1;
+		mesh.NumCell2Ds = f-1;
 	}
 }
