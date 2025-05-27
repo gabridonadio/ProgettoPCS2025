@@ -316,6 +316,9 @@ namespace PolyhedralLibrary
 			for (auto& vec : id_vertices_suddivisione) {
 				vec.clear();
 			}
+			for (auto& vec : id_vertices_suddivisione) {
+			vec.resize(b-1);
+			}
 			vertices_per_face.clear();
 
 			
@@ -334,7 +337,6 @@ namespace PolyhedralLibrary
 						// Nella lista associata al marker key non c'è il lato cercato, cioè il lato non è ancora stato diviso
 						*/
 						// DIVIDO IL LATO
-						cout << "i" << endl;
 						unsigned int vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
 						unsigned int vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
 						
@@ -359,6 +361,7 @@ namespace PolyhedralLibrary
 						if (iter_2DMark != mesh.Cell1DsMarker[2].end()){
 							for(unsigned int i = 1; i < b; i++) 
 							{
+								cout << "vertex" << vertex << endl;
 								double x_sudd = x_origin + vector_edge(0)*i;
 								double y_sudd = y_origin + vector_edge(1)*i;
 								double z_sudd = z_origin + vector_edge(2)*i;
@@ -388,9 +391,6 @@ namespace PolyhedralLibrary
 								mesh.Cell0DsId.push_back(n);
 								id_vertices_suddivisione[vertex][i-1] = n;
 								n++;
-								cout << i << endl;
-								// metodo Joana: salvare ora che faccio divisione del lato i vertici in una struttura ordinata
-								// e poi collegare primo con primo, ultimo con primo ecc ecc a seconda del caso
 							}
 							mesh.Cell1DsMarker[2].push_back(mesh.Cell2DsEdges[face][vertex]);
 						}
@@ -407,35 +407,25 @@ namespace PolyhedralLibrary
 			// popolo il livello 0 della mappa con tutti i vertici della faccia
 			vertices_per_face[0].reserve(b+1);
 			vertices_per_face[0].push_back(mesh.Cell2DsVertices[face][0]);
-			for(auto iter = id_vertices_suddivisione[0].begin(); iter != id_vertices_suddivisione[0].end(); iter++)
-				vertices_per_face[0].push_back(*iter);
+			for(const auto& iter : id_vertices_suddivisione[0]) {
+				vertices_per_face[0].push_back(iter);
+			}
 			vertices_per_face[0].push_back(mesh.Cell2DsVertices[face][1]);
 			
 			// trovo i vertici interni della triangolazione
 			// itero sull'altezza 
 			for(unsigned int j = 0; j < b-1 ; j++)
 			{
-				cout << "j" << endl;
-				cout << j << endl;
 				vertices_per_face[j+1].reserve(b-j);
 				vertices_per_face[j+1].push_back(id_vertices_suddivisione[2][b-2-j]);
 				// itero sulle righe
 				for(unsigned int k = b-2-j; k > 0; k--)
 				{
-					cout << "k" << endl;
-					cout << k << endl;
-					cout << mesh.Cell0DsCoordinates(n, 0) << endl;
-					cout << id_vertices_suddivisione[1][j] << endl;
 					mesh.Cell0DsCoordinates(n, 0) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 0) - matrix_edges(0, 0)*k;
-					cout<< "pass 1" << endl;
 					mesh.Cell0DsCoordinates(n, 1) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 1) - matrix_edges(0, 1)*k;
-					cout<< "pass 2" << endl;
 					mesh.Cell0DsCoordinates(n, 2) = mesh.Cell0DsCoordinates(id_vertices_suddivisione[1][j], 2) - matrix_edges(0, 2)*k;
-					cout<< "pass 3" << endl;
 					mesh.Cell0DsId.push_back(n);
-					cout<< "pass 4" << endl;
 					vertices_per_face[j+1].push_back(n);
-					cout<< "pass 5" << endl;
 					n++;
 				}
 				
@@ -452,11 +442,9 @@ namespace PolyhedralLibrary
 				// itero sull'altezza
 				for(unsigned int liv = 0; liv < b-j; liv++)
 				{
-					cout << "m " << m << endl;
 					unsigned int vert_0 = vertices_per_face[liv][j];
 					unsigned int vert_1 = vertices_per_face[liv][j+1];
 					unsigned int vert_2 = vertices_per_face[liv+1][j];
-					
 					
 					// memorizzazione lati
 					mesh.Cell1DsExtrema(m, 0) = vert_0;
@@ -476,8 +464,8 @@ namespace PolyhedralLibrary
 					m++;
 					
 					// memorizzazione faccia con lati appena creati
-					mesh.Cell2DsVertices[m] = {vert_0, vert_1, vert_2};
-					mesh.Cell2DsEdges[m] = {edge_0, edge_1, edge_2};
+					mesh.Cell2DsVertices[f] = {vert_0, vert_1, vert_2};
+					mesh.Cell2DsEdges[f] = {edge_0, edge_1, edge_2};
 					mesh.Cell2DsId.push_back(f);
 					f++;
 					
@@ -485,16 +473,23 @@ namespace PolyhedralLibrary
 				}
 			}
 			
+			for(unsigned int i = 0; i < 3; i++) {
+				cout << "id_vertices " << i << " " << endl;
+				for(unsigned int j = 0; j < b-1; j++)
+					cout << id_vertices_suddivisione[i][j] << ", " << endl; 
+			}
+			
+			
 			for(unsigned int i =0; i < b+1; i++){
-				cout << "controllo " << i << " " << endl;
+				cout << "vertices_per face " << i << " " << endl;
 				for(unsigned int j = 0; j <b+1-i; j++)
 					cout << vertices_per_face[i][j] << ", " << endl; 
 			}
 			
 		}
 		cout << n << endl;
-		mesh.NumCell0Ds = n-1;
-		mesh.NumCell1Ds = m-1;
-		mesh.NumCell2Ds = f-1;
+		mesh.NumCell0Ds = n;
+		mesh.NumCell1Ds = m;
+		mesh.NumCell2Ds = f;
 	}
 }
