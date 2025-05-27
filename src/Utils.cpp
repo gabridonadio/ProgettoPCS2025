@@ -252,28 +252,27 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsVertices[19] = {9, 10,11};
 
 
-			// DA CAMBIARE
 			mesh.Cell2DsEdges.resize(mesh.NumCell2Ds); //Salvataggio dei lati di ogni faccia
-			mesh.Cell2DsEdges[0] = {0, 4, 1};
-			mesh.Cell2DsEdges[1] = {1, 7,11};
-			mesh.Cell2DsEdges[2] = {11, 9, 2};
-			mesh.Cell2DsEdges[3] = {2,13, 3};
-			mesh.Cell2DsEdges[4] = {3, 6, 0};
-			mesh.Cell2DsEdges[5] = {5,17, 4};
-			mesh.Cell2DsEdges[6] = {5,16, 8};
-			mesh.Cell2DsEdges[7] = {8,10, 7};
-			mesh.Cell2DsEdges[8] = {10,20,11};
-			mesh.Cell2DsEdges[9] = {11,12, 9};
-			mesh.Cell2DsEdges[10] = {12,28,13};
-			mesh.Cell2DsEdges[11] = {28,19,14};
-			mesh.Cell2DsEdges[12] = {14,15, 6};
-			mesh.Cell2DsEdges[13] = {15,18, 5};
-			mesh.Cell2DsEdges[14] = {16,24,22};
-			mesh.Cell2DsEdges[15] = {24,23,22};
-			mesh.Cell2DsEdges[16] = {22,26,10};
-			mesh.Cell2DsEdges[17] = {21,11,26};
-			mesh.Cell2DsEdges[18] = {23,27,21};
-			mesh.Cell2DsEdges[19] = {27,18,19};
+			mesh.Cell2DsEdges[0] = {0, 5, 1};
+			mesh.Cell2DsEdges[1] = {1, 9,2};
+			mesh.Cell2DsEdges[2] = {2, 12, 3};
+			mesh.Cell2DsEdges[3] = {3,15, 4};
+			mesh.Cell2DsEdges[4] = {4, 6, 0};
+			mesh.Cell2DsEdges[5] = {6,18, 7};
+			mesh.Cell2DsEdges[6] = {7,28, 8};
+			mesh.Cell2DsEdges[7] = {5, 8, 11};
+			mesh.Cell2DsEdges[8] = {11,27,10};
+			mesh.Cell2DsEdges[9] = {9,10, 14};
+			mesh.Cell2DsEdges[10] = {14,24,13};
+			mesh.Cell2DsEdges[11] = {13,16,12};
+			mesh.Cell2DsEdges[12] = {16,22, 17};
+			mesh.Cell2DsEdges[13] = {17,19, 15};
+			mesh.Cell2DsEdges[14] = {19,21,18};
+			mesh.Cell2DsEdges[15] = {21,23,20};
+			mesh.Cell2DsEdges[16] = {20,29,28};
+			mesh.Cell2DsEdges[17] = {23,25,22};
+			mesh.Cell2DsEdges[18] = {25,26,24};
+			mesh.Cell2DsEdges[19] = {26,29,27};
 
 			for(unsigned int i = 0; i < mesh.NumCell2Ds; i++) //Salvataggio dei marker
 				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
@@ -289,11 +288,11 @@ namespace PolyhedralLibrary
 		mesh.Cell1DsId.reserve(100000);
 		mesh.Cell2DsId.reserve(100000);
 		
-		mesh.Cell0DsCoordinates.conservativeResize(10000, Eigen::NoChange);
-		mesh.Cell1DsExtrema.conservativeResize(10000, Eigen::NoChange);
+		mesh.Cell0DsCoordinates.conservativeResize(1000000, Eigen::NoChange);
+		mesh.Cell1DsExtrema.conservativeResize(1000000, Eigen::NoChange);
 		
-		mesh.Cell2DsVertices.reserve(10000);
-		mesh.Cell2DsEdges.reserve(10000);
+		mesh.Cell2DsVertices.reserve(10000000);
+		mesh.Cell2DsEdges.reserve(1000000);
 		
 
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
@@ -309,6 +308,7 @@ namespace PolyhedralLibrary
 		
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
+			cout << "face: " << face << endl;
 			// salvare le 3 direzioni del triangolo
 			Eigen::Matrix3d matrix_edges;
 			
