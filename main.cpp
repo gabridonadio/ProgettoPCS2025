@@ -132,9 +132,39 @@ int main(int argc, char *argv[])
 		 mesh.Cell0DsCoordinates(i,1)/=mesh.Cell0DsCoordinates.row(i).norm();
 		 mesh.Cell0DsCoordinates(i,2)/=mesh.Cell0DsCoordinates.row(i).norm();
 	 }
+	 
+	unsigned int T = b*b + b*c + c*c;
+	unsigned int V;
+	unsigned int E;
+	unsigned int F;
+	unsigned int E_initial;	
+	if(p==3 && q==3)
+		{
+			V = 2*T + 2;
+			E = 6*T;
+			F = 4*T;
+			E_initial = 6;
+			
+		}
+		
+		if((p==3 && q==4)||(p==4 && q==3))
+		{
+			V = 4*T + 2;
+			E = 12*T;
+			F = 8*T;
+			E_initial = 12;
+		}
+		
+		if((p==3 && q==5)||(p==5 && q==3))
+		{
+			V = 10*T + 2;
+			E = 30*T;
+			F = 20*T;
+			E_initial = 30;
+		}
     Gedim::UCDUtilities utilities;
 	Eigen::MatrixXd points = mesh.Cell0DsCoordinates.topRows(mesh.NumCell0Ds).transpose();
-	Eigen::MatrixXi segments = mesh.Cell1DsExtrema.topRows(mesh.NumCell1Ds).transpose();
+	Eigen::MatrixXi segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()-E_initial).transpose();
     utilities.ExportPoints("./Cell0Ds.inp",
                            points);
 
