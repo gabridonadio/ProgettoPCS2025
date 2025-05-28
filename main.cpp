@@ -116,23 +116,23 @@ int main(int argc, char *argv[])
 			cout << mesh.Cell0DsCoordinates(i,j) << " ";
 		cout << endl;
 	}
-	unsigned int count = 0;
-	for(auto iter=mesh.Cell1DsMarker[2].begin(); iter !=mesh.Cell1DsMarker[2].end(); iter++)
-		count++;
-	cout << "count "<< count << endl;
+	//unsigned int count = 0;
+	//for(auto iter=mesh.Cell1DsMarker[2].begin(); iter !=mesh.Cell1DsMarker[2].end(); iter++)
+	//	count++;
+	//cout << "count "<< count << endl;
 	
-	for(unsigned int i = 0; i<mesh.NumCell1Ds; i++)
-		cout << mesh.Cell1DsExtrema(i, 0) << ", " << mesh.Cell1DsExtrema(i, 1) << endl;
+	//for(unsigned int i = 0; i<mesh.NumCell1Ds; i++)
+	//	cout << mesh.Cell1DsExtrema(i, 0) << ", " << mesh.Cell1DsExtrema(i, 1) << endl;
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	 // Visual test 
+    Gedim::UCDUtilities utilities;
+    utilities.ExportPoints("./Cell0Ds.inp",
+                           mesh.Cell0DsCoordinates);
+
+    utilities.ExportSegments("./Cell1Ds.inp",
+                             mesh.Cell0DsCoordinates,
+                             mesh.Cell1DsExtrema);
+
 	
 	return 0;
 }
