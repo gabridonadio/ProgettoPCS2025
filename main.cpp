@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 	PolyhedralMesh mesh;
 	BuildPolyhedron(mesh, p, q);
 	
-	Triangulation_I(mesh, b, c);
+	Triangulation_I(mesh, p, q, b, c);
 	
 	/*for(unsigned int i=0; i < mesh.NumCell0Ds; i++) {
 		for(unsigned int j=0; j <3; j++)
@@ -126,13 +126,22 @@ int main(int argc, char *argv[])
 		cout << mesh.Cell1DsExtrema(i, 0) << ", " << mesh.Cell1DsExtrema(i, 1) << endl;*/
 	
 	 // Visual test 
+	 for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
+	 {
+		 mesh.Cell0DsCoordinates(i,0)/=mesh.Cell0DsCoordinates.row(i).norm();
+		 mesh.Cell0DsCoordinates(i,1)/=mesh.Cell0DsCoordinates.row(i).norm();
+		 mesh.Cell0DsCoordinates(i,2)/=mesh.Cell0DsCoordinates.row(i).norm();
+	 }
     Gedim::UCDUtilities utilities;
+	Eigen::MatrixXd points = mesh.Cell0DsCoordinates.topRows(mesh.NumCell0Ds).transpose();
+	Eigen::MatrixXi segments = mesh.Cell1DsExtrema.topRows(mesh.NumCell1Ds).transpose();
     utilities.ExportPoints("./Cell0Ds.inp",
-                           mesh.Cell0DsCoordinates);
+                           points);
 
     utilities.ExportSegments("./Cell1Ds.inp",
-                             mesh.Cell0DsCoordinates,
-                             mesh.Cell1DsExtrema);
+                             points,
+                             segments);
+							 
 
 	
 	return 0;

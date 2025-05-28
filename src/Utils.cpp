@@ -281,18 +281,44 @@ namespace PolyhedralLibrary
 	
 	// Suppongo di aver già controllato che uno tra b e c sia uguale a 0 e l'altro >= 1
 	// Triangolazione caso b = 0 oppure c = 0
-	void Triangulation_I(PolyhedralMesh& mesh, const int b, const int c)
+	void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, const int b, const int c)
 	{
+		unsigned int T = b*b + b*c + c*c;
+		unsigned int V;
+		unsigned int E;
+		unsigned int F;
 		
-		mesh.Cell0DsId.reserve(100000);
-		mesh.Cell1DsId.reserve(100000);
-		mesh.Cell2DsId.reserve(100000);
+		if(p==3 && q==3)
+		{
+			V = 2*T + 2;
+			E = 6*T;
+			F = 4*T;
+			
+		}
 		
-		mesh.Cell0DsCoordinates.conservativeResize(1000000, Eigen::NoChange);
-		mesh.Cell1DsExtrema.conservativeResize(1000000, Eigen::NoChange);
+		if((p==3 && q==4)||(p==4 && q==3))
+		{
+			V = 4*T + 2;
+			E = 12*T;
+			F = 8*T;
+		}
 		
-		mesh.Cell2DsVertices.reserve(10000000);
-		mesh.Cell2DsEdges.reserve(1000000);
+		if((p==3 && q==5)||(p==5 && q==3))
+		{
+			V = 10*T + 2;
+			E = 30*T;
+			F = 20*T;
+		}
+		
+		mesh.Cell0DsId.reserve(V);
+		mesh.Cell1DsId.reserve(10000);
+		mesh.Cell2DsId.reserve(F+F/T);
+		
+		mesh.Cell0DsCoordinates.conservativeResize(V, Eigen::NoChange);
+		mesh.Cell1DsExtrema.conservativeResize(10000, Eigen::NoChange);
+		
+		mesh.Cell2DsVertices.reserve(F+F/T);
+		mesh.Cell2DsEdges.reserve(F+F/T);
 		
 
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
@@ -305,6 +331,8 @@ namespace PolyhedralLibrary
 		unsigned int n = mesh.NumCell0Ds;
 		unsigned int m = mesh.NumCell1Ds;	// usato nella triangolazione
 		unsigned int f = mesh.NumCell2Ds;	// usato nella triangolazione
+		
+		mesh.Cell1DsMarker[3].push_back(0);
 		
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
@@ -446,25 +474,150 @@ namespace PolyhedralLibrary
 					unsigned int vert_2 = vertices_per_face[liv+1][j];
 					
 					// memorizzazione lati
+					// creazione lato 0
+					cout << "passo " << j << " lato 0" << endl;
 					mesh.Cell1DsExtrema(m, 0) = vert_0;
 					mesh.Cell1DsExtrema(m, 1) = vert_1;
 					unsigned int edge_0 = m;
-					mesh.Cell1DsId.push_back(edge_0);
-					m++;
+					
+					if(liv == 0)
+					{
+						bool found = false;
+						for(auto& iter : mesh.Cell1DsMarker[3])
+						{
+							// cerchiamo se esiste il lato con estremi vert_0 e vert_1 tra quelli con marker 3
+							if((mesh.Cell1DsExtrema(iter, 0) == vert_0 && mesh.Cell1DsExtrema(iter, 1) == vert_1)||(mesh.Cell1DsExtrema(iter, 0) == vert_1 && mesh.Cell1DsExtrema(iter, 1) == vert_0))
+							{
+								edge_0 = iter;
+								found = true;
+								cout << iter << endl;
+							}
+						}
+						
+						if(not found)
+						{
+							mesh.Cell1DsMarker[3].push_back(m);
+							mesh.Cell1DsId.push_back(edge_0);
+							cout << m << endl;
+							m++;
+						}
+					}
+					else
+					{
+						mesh.Cell1DsId.push_back(edge_0);
+						cout << m << endl;
+						m++;
+					}
+					
+					cout << "passo " << j << " lato 1" << endl;
+					// creazione lato 1
 					mesh.Cell1DsExtrema(m, 0) = vert_1;
 					mesh.Cell1DsExtrema(m, 1) = vert_2;
 					unsigned int edge_1 = m;
 					mesh.Cell1DsId.push_back(edge_1);
-					m++;
+					if(j == b-1)
+					{
+						bool found = false;
+						for(auto& iter : mesh.Cell1DsMarker[3])
+						{
+							// cerchiamo se esiste il lato con estremi vert_0 e vert_1 tra quelli con marker 3
+							if((mesh.Cell1DsExtrema(iter, 0) == vert_1 && mesh.Cell1DsExtrema(iter, 1) == vert_2)||(mesh.Cell1DsExtrema(iter, 0) == vert_2 && mesh.Cell1DsExtrema(iter, 1) == vert_1))
+							{
+								edge_1 = iter;
+								found = true;
+								cout << iter << endl;
+							}
+						}
+						if(not found)
+						{
+							mesh.Cell1DsMarker[3].push_back(m);
+							mesh.Cell1DsId.push_back(edge_1);
+							cout << m << endl;
+							m++;
+
+						}
+					}
+					else
+					{
+						mesh.Cell1DsId.push_back(edge_1);
+						cout << m << endl;
+						m++;
+					}
+					
+					// creazione lato 2
+					cout << "passo " << j << " lato 2" << endl;
 					mesh.Cell1DsExtrema(m, 0) = vert_2;
 					mesh.Cell1DsExtrema(m, 1) = vert_0;
 					unsigned int edge_2 = m;
 					mesh.Cell1DsId.push_back(edge_2);
-					m++;
+					if(j == 0)
+					{
+						bool found = false;
+						for(auto& iter : mesh.Cell1DsMarker[3])
+						{
+							// cerchiamo se esiste il lato con estremi vert_0 e vert_1 tra quelli con marker 3
+							if((mesh.Cell1DsExtrema(iter, 0) == vert_2 && mesh.Cell1DsExtrema(iter, 1) == vert_0)||(mesh.Cell1DsExtrema(iter, 0) == vert_0 && mesh.Cell1DsExtrema(iter, 1) == vert_2))
+							{
+								edge_2 = iter;
+								found = true;
+								cout << iter << endl;
+							}
+						}
+						
+						if(not found)
+						{
+							mesh.Cell1DsMarker[3].push_back(m);
+							mesh.Cell1DsId.push_back(edge_2);
+							cout << m << endl;
+							m++;
+						}
+					}
+					else
+					{
+						mesh.Cell1DsId.push_back(edge_2);
+						cout << m << endl;
+						m++;
+					}
 					
 					// memorizzazione faccia con lati appena creati
 					mesh.Cell2DsVertices[f] = {vert_0, vert_1, vert_2};
 					mesh.Cell2DsEdges[f] = {edge_0, edge_1, edge_2};
+					mesh.Cell2DsId.push_back(f);
+					f++;
+					
+				}
+			}
+			
+			
+			// numero lati triangolazione: 3b(b+1)/2
+			//triangolazione seconda parte
+			for(unsigned int j = 0; j < b; j++)
+			{
+				// itero sull'altezza
+				for(unsigned int liv = 0; liv < b-j-1; liv++)
+				{
+					unsigned int vert_0c = vertices_per_face[liv][j+1];
+					unsigned int vert_1c = vertices_per_face[liv+1][j];
+					unsigned int vert_2c = vertices_per_face[liv+1][j+1];
+					
+					unsigned int edge_0c;
+					unsigned int edge_1c;
+					unsigned int edge_2c;
+					
+					// memorizzazione lati
+					for(unsigned int i = 0; i < m; i++)
+					{
+						if((mesh.Cell1DsExtrema(i,0)==vert_0c && mesh.Cell1DsExtrema(i,1)==vert_1c)||(mesh.Cell1DsExtrema(i,0)==vert_1c && mesh.Cell1DsExtrema(i,1)==vert_0c))
+							edge_0c = i;
+						else if((mesh.Cell1DsExtrema(i,0)==vert_1c && mesh.Cell1DsExtrema(i,1)==vert_2c)||(mesh.Cell1DsExtrema(i,0)==vert_2c && mesh.Cell1DsExtrema(i,1)==vert_1c))
+							edge_1c = i;
+						else if((mesh.Cell1DsExtrema(i,0)==vert_2c && mesh.Cell1DsExtrema(i,1)==vert_0c)||(mesh.Cell1DsExtrema(i,0)==vert_0c && mesh.Cell1DsExtrema(i,1)==vert_2c))
+							edge_2c = i;
+					}
+					
+					// memorizzazione faccia con lati appena creati
+					mesh.Cell2DsVertices[f] = {vert_0c, vert_1c, vert_2c};
+					mesh.Cell2DsEdges[f] = {edge_0c, edge_1c, edge_2c};
 					mesh.Cell2DsId.push_back(f);
 					f++;
 					
