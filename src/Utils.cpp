@@ -308,7 +308,6 @@ namespace PolyhedralLibrary
 		
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
-			cout << "face: " << face << endl;
 			// salvare le 3 direzioni del triangolo
 			Eigen::Matrix3d matrix_edges;
 			
@@ -361,7 +360,7 @@ namespace PolyhedralLibrary
 						if (iter_2DMark != mesh.Cell1DsMarker[2].end()){
 							for(unsigned int i = 1; i < b; i++) 
 							{
-								cout << "vertex" << vertex << endl;
+								//cout << "vertex" << vertex << endl;
 								double x_sudd = x_origin + vector_edge(0)*i;
 								double y_sudd = y_origin + vector_edge(1)*i;
 								double z_sudd = z_origin + vector_edge(2)*i;
@@ -473,21 +472,23 @@ namespace PolyhedralLibrary
 				}
 			}
 			
-			for(unsigned int i = 0; i < 3; i++) {
+			/*for(unsigned int i = 0; i < 3; i++) {
 				cout << "id_vertices " << i << " " << endl;
 				for(unsigned int j = 0; j < b-1; j++)
 					cout << id_vertices_suddivisione[i][j] << ", " << endl; 
-			}
+			}*/
 			
 			
-			for(unsigned int i =0; i < b+1; i++){
+			/*for(unsigned int i =0; i < b+1; i++){
 				cout << "vertices_per face " << i << " " << endl;
 				for(unsigned int j = 0; j <b+1-i; j++)
 					cout << vertices_per_face[i][j] << ", " << endl; 
-			}
+			}*/
 			
 		}
-		cout << n << endl;
+		cout << "n: " << n << endl;
+		cout << "m: " << m << endl;
+		cout << "f: " << f << endl;
 		mesh.NumCell0Ds = n;
 		mesh.NumCell1Ds = m;
 		mesh.NumCell2Ds = f;

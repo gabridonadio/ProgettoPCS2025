@@ -111,18 +111,19 @@ int main(int argc, char *argv[])
 	BuildPolyhedron(mesh, p, q);
 	
 	Triangulation_I(mesh, b, c);
-	for(unsigned int i=0; i < mesh.NumCell0Ds; i++) {
+	
+	/*for(unsigned int i=0; i < mesh.NumCell0Ds; i++) {
 		for(unsigned int j=0; j <3; j++)
 			cout << mesh.Cell0DsCoordinates(i,j) << " ";
 		cout << endl;
 	}
-	//unsigned int count = 0;
-	//for(auto iter=mesh.Cell1DsMarker[2].begin(); iter !=mesh.Cell1DsMarker[2].end(); iter++)
-	//	count++;
-	//cout << "count "<< count << endl;
+	unsigned int count = 0;
+	for(auto iter=mesh.Cell1DsMarker[2].begin(); iter !=mesh.Cell1DsMarker[2].end(); iter++)
+		count++;
+	cout << "count "<< count << endl;
 	
-	//for(unsigned int i = 0; i<mesh.NumCell1Ds; i++)
-	//	cout << mesh.Cell1DsExtrema(i, 0) << ", " << mesh.Cell1DsExtrema(i, 1) << endl;
+	for(unsigned int i = 0; i<mesh.NumCell1Ds; i++)
+		cout << mesh.Cell1DsExtrema(i, 0) << ", " << mesh.Cell1DsExtrema(i, 1) << endl;*/
 	
 	 // Visual test 
     Gedim::UCDUtilities utilities;
