@@ -128,9 +128,10 @@ int main(int argc, char *argv[])
 	 // Visual test 
 	 for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
 	 {
-		 mesh.Cell0DsCoordinates(i,0)/=mesh.Cell0DsCoordinates.row(i).norm();
-		 mesh.Cell0DsCoordinates(i,1)/=mesh.Cell0DsCoordinates.row(i).norm();
-		 mesh.Cell0DsCoordinates(i,2)/=mesh.Cell0DsCoordinates.row(i).norm();
+		double norma = mesh.Cell0DsCoordinates.row(i).norm();
+		mesh.Cell0DsCoordinates(i,0) /= norma;
+		mesh.Cell0DsCoordinates(i,1) /= norma;
+		mesh.Cell0DsCoordinates(i,2) /= norma;
 	 }
 	 
 	unsigned int T = b*b + b*c + c*c;

@@ -332,8 +332,11 @@ namespace PolyhedralLibrary
 		unsigned int m = mesh.NumCell1Ds;	// usato nella triangolazione
 		unsigned int f = mesh.NumCell2Ds;	// usato nella triangolazione
 		
-		mesh.Cell1DsMarker[3].push_back(0);
-		
+		vector<unsigned int> v;
+
+		mesh.Cell1DsMarker[3] = v;
+	
+
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
 			// salvare le 3 direzioni del triangolo
@@ -475,7 +478,7 @@ namespace PolyhedralLibrary
 					
 					// memorizzazione lati
 					// creazione lato 0
-					cout << "passo " << j << " lato 0" << endl;
+					//cout << "passo " << j << " lato 0" << endl;
 					mesh.Cell1DsExtrema(m, 0) = vert_0;
 					mesh.Cell1DsExtrema(m, 1) = vert_1;
 					unsigned int edge_0 = m;
@@ -490,26 +493,26 @@ namespace PolyhedralLibrary
 							{
 								edge_0 = iter;
 								found = true;
-								cout << iter << endl;
+					//			cout << iter << endl;
 							}
 						}
 						
-						if(not found)
+						if(found == false)
 						{
 							mesh.Cell1DsMarker[3].push_back(m);
 							mesh.Cell1DsId.push_back(edge_0);
-							cout << m << endl;
+					//		cout << m << endl;
 							m++;
 						}
 					}
 					else
 					{
 						mesh.Cell1DsId.push_back(edge_0);
-						cout << m << endl;
+					//	cout << m << endl;
 						m++;
 					}
 					
-					cout << "passo " << j << " lato 1" << endl;
+					//cout << "passo " << j << " lato 1" << endl;
 					// creazione lato 1
 					mesh.Cell1DsExtrema(m, 0) = vert_1;
 					mesh.Cell1DsExtrema(m, 1) = vert_2;
@@ -525,14 +528,14 @@ namespace PolyhedralLibrary
 							{
 								edge_1 = iter;
 								found = true;
-								cout << iter << endl;
+					//			cout << iter << endl;
 							}
 						}
 						if(not found)
 						{
 							mesh.Cell1DsMarker[3].push_back(m);
 							mesh.Cell1DsId.push_back(edge_1);
-							cout << m << endl;
+					//		cout << m << endl;
 							m++;
 
 						}
@@ -540,12 +543,12 @@ namespace PolyhedralLibrary
 					else
 					{
 						mesh.Cell1DsId.push_back(edge_1);
-						cout << m << endl;
+					//	cout << m << endl;
 						m++;
 					}
 					
 					// creazione lato 2
-					cout << "passo " << j << " lato 2" << endl;
+					//cout << "passo " << j << " lato 2" << endl;
 					mesh.Cell1DsExtrema(m, 0) = vert_2;
 					mesh.Cell1DsExtrema(m, 1) = vert_0;
 					unsigned int edge_2 = m;
@@ -560,7 +563,7 @@ namespace PolyhedralLibrary
 							{
 								edge_2 = iter;
 								found = true;
-								cout << iter << endl;
+					//			cout << iter << endl;
 							}
 						}
 						
@@ -568,14 +571,14 @@ namespace PolyhedralLibrary
 						{
 							mesh.Cell1DsMarker[3].push_back(m);
 							mesh.Cell1DsId.push_back(edge_2);
-							cout << m << endl;
+					//		cout << m << endl;
 							m++;
 						}
 					}
 					else
 					{
 						mesh.Cell1DsId.push_back(edge_2);
-						cout << m << endl;
+					//	cout << m << endl;
 						m++;
 					}
 					
