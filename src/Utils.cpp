@@ -311,11 +311,11 @@ namespace PolyhedralLibrary
 		}
 		
 		mesh.Cell0DsId.reserve(V);
-		mesh.Cell1DsId.reserve(10000);
+		mesh.Cell1DsId.reserve(E+E/T);
 		mesh.Cell2DsId.reserve(F+F/T);
 		
 		mesh.Cell0DsCoordinates.conservativeResize(V, Eigen::NoChange);
-		mesh.Cell1DsExtrema.conservativeResize(10000, Eigen::NoChange);
+		mesh.Cell1DsExtrema.conservativeResize(E+E/T, Eigen::NoChange);
 		
 		mesh.Cell2DsVertices.reserve(F+F/T);
 		mesh.Cell2DsEdges.reserve(F+F/T);
@@ -497,7 +497,7 @@ namespace PolyhedralLibrary
 							}
 						}
 						
-						if(found == false)
+						if(not found)
 						{
 							mesh.Cell1DsMarker[3].push_back(m);
 							mesh.Cell1DsId.push_back(edge_0);
@@ -518,7 +518,7 @@ namespace PolyhedralLibrary
 					mesh.Cell1DsExtrema(m, 1) = vert_2;
 					unsigned int edge_1 = m;
 					mesh.Cell1DsId.push_back(edge_1);
-					if(j == b-1)
+					if(liv == b-j-1)
 					{
 						bool found = false;
 						for(auto& iter : mesh.Cell1DsMarker[3])
@@ -648,5 +648,30 @@ namespace PolyhedralLibrary
 		mesh.NumCell0Ds = n;
 		mesh.NumCell1Ds = m;
 		mesh.NumCell2Ds = f;
+	}
+	PolyhedralMesh Dual(PolyhedralMesh& mesh, unsigned int E_initial, unsigned int F_initial)
+	{
+		// creiamo la mesh in cui memorizziamo le informazioni del duale
+		PolyhedralMesh dual; 
+		dual.NumCell0Ds = mesh.NumCell2Ds-F_initial;
+		// creiamo un numero di vertici pari al numero di facce di mesh (escluse quelle principali)
+		for(unsigned int face = F_initial; face < mesh.NumCell2Ds; face++)
+		{
+			// prendiamo le righe di Cell2DsVertices a partire dalla F_initial 
+			// e troviamo le coordinate del baricento a partire dai vertici di ogni faccia
+			x_vertex = 0;
+			y_vertex = 0;
+			z_vertex = 0;
+			unsigned int num = 0;
+			for(const auto& vertex: mesh.Cell2DsVertices[face])
+			{
+				num++;
+				x_vertex += mesh.Cell0DsCoordinates[vertex][0];
+				y_vertex += mesh.Cell0DsCoordinates[vertex][1];
+				z_vertex += mesh.Cell0DsCoordinates[vertex][2];
+			}
+			dual.Cell0DsCoordinates << x_vertex/num, y_vertex/num, z_vertex/num; 
+		}
+		
 	}
 }
