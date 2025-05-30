@@ -332,9 +332,9 @@ namespace PolyhedralLibrary
 		unsigned int m = mesh.NumCell1Ds;	// usato nella triangolazione
 		unsigned int f = mesh.NumCell2Ds;	// usato nella triangolazione
 		
-		vector<unsigned int> v;
+		//vector<unsigned int> v;
 
-		mesh.Cell1DsMarker[3] = v;
+		//mesh.Cell1DsMarker[3] = v;
 	
 
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
