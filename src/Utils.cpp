@@ -2,12 +2,14 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <unordered_set>
 
 using namespace std;
 
+
 namespace PolyhedralLibrary
 {
-	void BuildPolyhedron(PolyhedralMesh& mesh, int p, int q)
+	void BuildPolyhedron(PolyhedralMesh& mesh, const int p, const int q)
 	{	
 		const double phi = (1.0+sqrt(5.0))/2.0; 
 		// tetraedro
@@ -281,7 +283,7 @@ namespace PolyhedralLibrary
 	
 	// Suppongo di aver già controllato che uno tra b e c sia uguale a 0 e l'altro >= 1
 	// Triangolazione caso b = 0 oppure c = 0
-	void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, const int b, const int c)
+	void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, int b, int c)
 	{
 		unsigned int T = b*b + b*c + c*c;
 		unsigned int V;
@@ -310,21 +312,29 @@ namespace PolyhedralLibrary
 			F = 20*T;
 		}
 		
-		mesh.Cell0DsId.reserve(V);
-		mesh.Cell1DsId.reserve(E+E/T);
-		mesh.Cell2DsId.reserve(F+F/T);
+		if(b!=1)
+		{
+			mesh.Cell0DsId.reserve(V);
+			mesh.Cell1DsId.reserve(E+E/T);
+			mesh.Cell2DsId.reserve(F+F/T);
+			
+			mesh.Cell0DsCoordinates.conservativeResize(V, Eigen::NoChange);
+			mesh.Cell1DsExtrema.conservativeResize(E+E/T, Eigen::NoChange);
+			
+			mesh.Cell2DsVertices.reserve(F+F/T);
+			mesh.Cell2DsEdges.reserve(F+F/T);
+		}
 		
-		mesh.Cell0DsCoordinates.conservativeResize(V, Eigen::NoChange);
-		mesh.Cell1DsExtrema.conservativeResize(E+E/T, Eigen::NoChange);
-		
-		mesh.Cell2DsVertices.reserve(F+F/T);
-		mesh.Cell2DsEdges.reserve(F+F/T);
+		b = max(b,c);
 		
 
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
 		array<vector<unsigned int>, 3> id_vertices_suddivisione;
-		for (auto& vec : id_vertices_suddivisione) {
-			vec.resize(b-1);
+		if(b > 1)
+		{
+			for (auto& vec : id_vertices_suddivisione) {
+				vec.resize(b-1);
+			}
 		}
 		
 		map<unsigned int, vector<unsigned int>> vertices_per_face;
@@ -339,6 +349,9 @@ namespace PolyhedralLibrary
 
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
+			if(b==1)
+				continue;
+			
 			// salvare le 3 direzioni del triangolo
 			Eigen::Matrix3d matrix_edges;
 			
@@ -649,29 +662,81 @@ namespace PolyhedralLibrary
 		mesh.NumCell1Ds = m;
 		mesh.NumCell2Ds = f;
 	}
-	PolyhedralMesh Dual(PolyhedralMesh& mesh, unsigned int E_initial, unsigned int F_initial)
+	
+	void Dual(PolyhedralMesh& mesh, PolyhedralMesh& dual, const unsigned int E_initial, const unsigned int F_initial)
 	{
-		// creiamo la mesh in cui memorizziamo le informazioni del duale
-		PolyhedralMesh dual; 
+		// memorizziamo le informazioni del duale
 		dual.NumCell0Ds = mesh.NumCell2Ds-F_initial;
+		dual.Cell0DsId.reserve(dual.NumCell0Ds);
+		dual.Cell0DsCoordinates.resize(dual.NumCell0Ds, 3);
 		// creiamo un numero di vertici pari al numero di facce di mesh (escluse quelle principali)
 		for(unsigned int face = F_initial; face < mesh.NumCell2Ds; face++)
 		{
 			// prendiamo le righe di Cell2DsVertices a partire dalla F_initial 
 			// e troviamo le coordinate del baricento a partire dai vertici di ogni faccia
-			x_vertex = 0;
-			y_vertex = 0;
-			z_vertex = 0;
+			double x_vertex = 0;
+			double y_vertex = 0;
+			double z_vertex = 0;
 			unsigned int num = 0;
 			for(const auto& vertex: mesh.Cell2DsVertices[face])
 			{
 				num++;
-				x_vertex += mesh.Cell0DsCoordinates[vertex][0];
-				y_vertex += mesh.Cell0DsCoordinates[vertex][1];
-				z_vertex += mesh.Cell0DsCoordinates[vertex][2];
+				x_vertex += mesh.Cell0DsCoordinates(vertex,0);
+				y_vertex += mesh.Cell0DsCoordinates(vertex,1);
+				z_vertex += mesh.Cell0DsCoordinates(vertex,2);
 			}
-			dual.Cell0DsCoordinates << x_vertex/num, y_vertex/num, z_vertex/num; 
+			dual.Cell0DsCoordinates(face-F_initial, 0) = x_vertex/num;
+			dual.Cell0DsCoordinates(face-F_initial, 1) = y_vertex/num;
+			dual.Cell0DsCoordinates(face-F_initial, 2) = z_vertex/num;
+			// al primo Id corrisponde il vertice creato a partire dalla prima faccia
+			dual.Cell0DsId.push_back(face-F_initial);
 		}
+		
+		// creiamo struttura di vicinato delle facce per sapere quali vertici collegare
+		// per ogni faccia, se questa ha un lato in comune con un'altra, allora sono vicine
+		
+		// chiave: Id_faccia, valori: Id_facce adiacenti
+		map<unsigned int, vector<unsigned int>> neighborhood_faces; 
+		for(unsigned int face = F_initial; face < mesh.NumCell2Ds; face++)
+		{
+			vector<unsigned int> neighbors;
+			neighbors.reserve(3); // ogni faccia(tutte triangolari) ha esattamente tre facce adiacenti
+			const auto& key_edges = mesh.Cell2DsEdges[face];
+			unordered_set<unsigned int> to_be_found = {key_edges[0], key_edges[1], key_edges[2]};
+			
+			for(unsigned int face_ad = F_initial; face_ad < mesh.NumCell2Ds; face_ad++)
+			{
+				if(face_ad == face)
+					continue;
+				
+				if(neighbors.size() == 3)
+					break;
+				
+				const auto& iter_face = mesh.Cell2DsEdges[face_ad];
+				
+				// per ogni faccia itero sui lati per vedere se ce n'è uno comune
+				// LAMBDA FUNCTION
+				auto iter_edges = find_if(iter_face.begin(), iter_face.end(), [&](int id_edge) {
+				return to_be_found.count(id_edge) > 0;
+				});
+				if(iter_edges!=iter_face.end())
+				{
+					neighbors.push_back(face_ad);
+				}
+				
+			}
+			
+			neighborhood_faces[face] = neighbors;
+		}
+		
+		for(unsigned int i = F_initial; i<mesh.NumCell2Ds; i++)
+		{
+			cout << "faccia "  << i << endl;
+			for(unsigned int j = 0; j< neighborhood_faces[i].size(); j++)
+				cout << neighborhood_faces[i][j] << " ";
+			cout << endl;
+		}
+		
 		
 	}
 }

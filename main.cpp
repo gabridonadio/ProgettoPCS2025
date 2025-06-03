@@ -125,14 +125,15 @@ int main(int argc, char *argv[])
 	for(unsigned int i = 0; i<mesh.NumCell1Ds; i++)
 		cout << mesh.Cell1DsExtrema(i, 0) << ", " << mesh.Cell1DsExtrema(i, 1) << endl;*/
 	
-	 // Visual test 
-	 for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
-	 {
+	// Visual test 
+	
+	for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
+	{
 		double norma = mesh.Cell0DsCoordinates.row(i).norm();
 		mesh.Cell0DsCoordinates(i,0) /= norma;
 		mesh.Cell0DsCoordinates(i,1) /= norma;
 		mesh.Cell0DsCoordinates(i,2) /= norma;
-	 }
+	}
 	 
 	unsigned int T = b*b + b*c + c*c;
 	unsigned int V;
@@ -163,16 +164,27 @@ int main(int argc, char *argv[])
 			F = 20*T;
 			E_initial = 30;
 		}
-    Gedim::UCDUtilities utilities;
+		
+	PolyhedralMesh dual;
+	if(b!=1)
+		Dual(mesh, dual, E_initial, F/T);
+	else
+		Dual(mesh, dual, 0, 0);
+	
+	Gedim::UCDUtilities utilities;
 	Eigen::MatrixXd points = mesh.Cell0DsCoordinates.topRows(mesh.NumCell0Ds).transpose();
-	Eigen::MatrixXi segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()-E_initial).transpose();
-    utilities.ExportPoints("./Cell0Ds.inp",
-                           points);
+	Eigen::MatrixXi segments;
+	if(b!=1)
+	{
+		segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()-E_initial).transpose();
+	}
+	else
+	{
+		segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()).transpose();
+	}
+	utilities.ExportPoints("./Cell0Ds.inp", points);
 
-    utilities.ExportSegments("./Cell1Ds.inp",
-                             points,
-                             segments);
-							 
+	utilities.ExportSegments("./Cell1Ds.inp", points, segments);
 
 	
 	return 0;
