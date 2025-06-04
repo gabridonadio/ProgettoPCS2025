@@ -667,8 +667,23 @@ namespace PolyhedralLibrary
 	{
 		// memorizziamo le informazioni del duale
 		dual.NumCell0Ds = mesh.NumCell2Ds-F_initial;
+		dual.NumCell1Ds = mesh.NumCell1Ds-E_initial;
+		dual.NumCell2Ds = mesh.NumCell0Ds;
+		unsigned int n = 0;
+		unsigned int m = 0;
+		unsigned int f = 0;
+		
 		dual.Cell0DsId.reserve(dual.NumCell0Ds);
 		dual.Cell0DsCoordinates.resize(dual.NumCell0Ds, 3);
+		
+		dual.Cell1DsId.reserve(dual.NumCell1Ds);
+		dual.Cell1DsExtrema.resize(dual.NumCell1Ds, 2);
+		
+		dual.Cell2DsId.reserve(dual.NumCell2Ds);
+		dual.Cell2DsEdges.resize(dual.NumCell2Ds);
+		dual.Cell2DsVertices.resize(dual.NumCell2Ds);
+		
+		
 		// creiamo un numero di vertici pari al numero di facce di mesh (escluse quelle principali)
 		for(unsigned int face = F_initial; face < mesh.NumCell2Ds; face++)
 		{
@@ -695,26 +710,29 @@ namespace PolyhedralLibrary
 		// creiamo struttura di vicinato delle facce per sapere quali vertici collegare
 		// per ogni faccia, se questa ha un lato in comune con un'altra, allora sono vicine
 		
-		// chiave: Id_faccia, valori: Id_facce adiacenti
+		// chiave: Id_vertice, valori: Id_facce adiacenti
 		map<unsigned int, vector<unsigned int>> neighborhood_faces; 
-		for(unsigned int face = F_initial; face < mesh.NumCell2Ds; face++)
+		for(unsigned int vertex = 0; vertex < mesh.NumCell0Ds; vertex++)
 		{
 			vector<unsigned int> neighbors;
-			neighbors.reserve(3); // ogni faccia(tutte triangolari) ha esattamente tre facce adiacenti
-			const auto& key_edges = mesh.Cell2DsEdges[face];
-			unordered_set<unsigned int> to_be_found = {key_edges[0], key_edges[1], key_edges[2]};
+			neighbors.reserve(6); // massima valenza dei vertici è 6
+			/*const auto& key_edges = mesh.Cell2DsEdges[face];
+			unordered_set<unsigned int> to_be_found = {key_edges[0], key_edges[1], key_edges[2]};*/
+			// cerchiamo facce con vertex
 			
 			for(unsigned int face_ad = F_initial; face_ad < mesh.NumCell2Ds; face_ad++)
 			{
-				if(face_ad == face)
-					continue;
+				/*if(face_ad == face)
+					continue;*/
 				
-				if(neighbors.size() == 3)
-					break;
+				/*if(neighbors.size() == 3)
+					break;*/
 				
-				const auto& iter_face = mesh.Cell2DsEdges[face_ad];
+				const auto& iter_face = mesh.Cell2DsVertices[face_ad];
 				
-				// per ogni faccia itero sui lati per vedere se ce n'è uno comune
+				// per ogni faccia itero sui vertici per vedere se c'è il vertice vertex
+				
+				/*
 				// LAMBDA FUNCTION
 				auto iter_edges = find_if(iter_face.begin(), iter_face.end(), [&](int id_edge) {
 				return to_be_found.count(id_edge) > 0;
@@ -722,14 +740,112 @@ namespace PolyhedralLibrary
 				if(iter_edges!=iter_face.end())
 				{
 					neighbors.push_back(face_ad);
+				}*/
+				
+				auto iter_vertices = find(iter_face.begin(), iter_face.end(), vertex);
+				if(iter_vertices!=iter_face.end())
+				{
+					neighbors.push_back(face_ad);
 				}
+			}
+			
+			neighborhood_faces[vertex] = neighbors;
+		}
+		
+		
+		for(unsigned int vertex = 0; vertex < mesh.NumCell0Ds; vertex++)
+		{
+			unsigned int iter_face = neighborhood_faces[vertex][0];
+			vector<unsigned int> vertices;
+			vector<unsigned int> edges;
+			vertices.reserve(neighborhood_faces[vertex].size());
+			edges.reserve(neighborhood_faces[vertex].size());
+			vertices.push_back(iter_face-F_initial);
+			
+			dual.Cell2DsId.push_back(f);
+			f++;
+			unsigned int new_face_ad;
+			
+			int id_past = -1;
+			for(unsigned int face = 0; face < neighborhood_faces[vertex].size(); face++)
+			{
+				cout << "face " << face << endl;
+				
+				vector<unsigned int> edges_face = mesh.Cell2DsEdges[iter_face];
+				cout << "iterface " << iter_face << endl;
+				
+				bool found = false;
+				for(const auto& iter_face_ad: neighborhood_faces[vertex])
+				{
+					if(found)
+						break;
+					cout<< "iter_face_ad " << iter_face_ad << endl;
+					if(iter_face_ad == iter_face || iter_face_ad == id_past)
+						continue;
+					cout << "hey" << endl;
+					
+					vector<unsigned int> edges_face_ad = mesh.Cell2DsEdges[iter_face_ad];
+					
+					for(const auto& it: edges_face_ad)
+					{
+						
+						auto iter_edges = find(edges_face.begin(), edges_face.end(), it);
+						if(iter_edges!=edges_face.end())
+						{
+							found = true;
+							new_face_ad = iter_face_ad;
+							if(face < neighborhood_faces[vertex].size()-1)
+								vertices.push_back(new_face_ad-F_initial);
+							cout << new_face_ad-F_initial << endl;
+							
+						}
+					}
+					
+					
+					bool find = false;
+					unsigned int edge_0 = m;
+					unsigned int vert_0 = iter_face-F_initial;
+					unsigned int vert_1 = new_face_ad-F_initial;
+					for(auto& iter : dual.Cell1DsMarker[3])
+					{
+						// cerchiamo se esiste il lato con estremi vert_0 e vert_1 tra quelli con marker 3
+						if((dual.Cell1DsExtrema(iter, 0) == vert_0 && mesh.Cell1DsExtrema(iter, 1) == vert_1)||(mesh.Cell1DsExtrema(iter, 0) == vert_1 && mesh.Cell1DsExtrema(iter, 1) == vert_0))
+						{
+							edge_0 = iter;
+							find = true;
+						}
+					}
+					
+					if(not find)
+					{
+						dual.Cell1DsMarker[3].push_back(m);
+						dual.Cell1DsId.push_back(m);
+						// baricentro di faccia iter_face è iter_face-F_initial
+						dual.Cell1DsExtrema.row(m) << vert_0, vert_1;
+						m++;
+					}
+					
+					edges.push_back(edge_0);
+					
+				}
+				
+				id_past = iter_face;
+				iter_face = new_face_ad;
 				
 			}
 			
-			neighborhood_faces[face] = neighbors;
+			dual.Cell2DsVertices[vertex] = vertices;
+			dual.Cell2DsEdges[vertex] = edges;
+			cout << "vertices" << endl;
+			for(const auto& it: vertices)
+				cout<< it << " ";
+			cout << endl;
 		}
 		
-		for(unsigned int i = F_initial; i<mesh.NumCell2Ds; i++)
+		
+		
+		
+		for(unsigned int i = 0; i<mesh.NumCell0Ds; i++)
 		{
 			cout << "faccia "  << i << endl;
 			for(unsigned int j = 0; j< neighborhood_faces[i].size(); j++)
