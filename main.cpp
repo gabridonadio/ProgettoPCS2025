@@ -176,11 +176,11 @@ int main(int argc, char *argv[])
 	Eigen::MatrixXi segments;
 	if(b!=1)
 	{
-		segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()-E_initial).transpose();
+		segments = mesh.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()-E_initial).transpose();
 	}
 	else
 	{
-		segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()).transpose();
+		segments = mesh.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
 	}
 	utilities.ExportPoints("./Cell0Ds.inp", points);
 

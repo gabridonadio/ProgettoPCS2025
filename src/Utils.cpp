@@ -662,6 +662,7 @@ namespace PolyhedralLibrary
 		mesh.NumCell1Ds = m;
 		mesh.NumCell2Ds = f;
 	}
+
 	
 	void Dual(PolyhedralMesh& mesh, PolyhedralMesh& dual, const unsigned int E_initial, const unsigned int F_initial)
 	{
@@ -769,20 +770,20 @@ namespace PolyhedralLibrary
 			int id_past = -1;
 			for(unsigned int face = 0; face < neighborhood_faces[vertex].size(); face++)
 			{
-				cout << "face " << face << endl;
+				//cout << "face " << face << endl;
 				
 				vector<unsigned int> edges_face = mesh.Cell2DsEdges[iter_face];
-				cout << "iterface " << iter_face << endl;
+				//cout << "iterface " << iter_face << endl;
 				
 				bool found = false;
 				for(const auto& iter_face_ad: neighborhood_faces[vertex])
 				{
 					if(found)
 						break;
-					cout<< "iter_face_ad " << iter_face_ad << endl;
+					//cout<< "iter_face_ad " << iter_face_ad << endl;
 					if(iter_face_ad == iter_face || iter_face_ad == id_past)
 						continue;
-					cout << "hey" << endl;
+					//cout << "hey" << endl;
 					
 					vector<unsigned int> edges_face_ad = mesh.Cell2DsEdges[iter_face_ad];
 					
@@ -796,7 +797,7 @@ namespace PolyhedralLibrary
 							new_face_ad = iter_face_ad;
 							if(face < neighborhood_faces[vertex].size()-1)
 								vertices.push_back(new_face_ad-F_initial);
-							cout << new_face_ad-F_initial << endl;
+							//cout << new_face_ad-F_initial << endl;
 							
 						}
 					}
@@ -816,12 +817,13 @@ namespace PolyhedralLibrary
 						}
 					}
 					
-					if(not find)
+					if(not find && m < dual.NumCell1Ds) //aggiunto controllo su m
 					{
 						dual.Cell1DsMarker[3].push_back(m);
 						dual.Cell1DsId.push_back(m);
 						// baricentro di faccia iter_face è iter_face-F_initial
-						dual.Cell1DsExtrema.row(m) << vert_0, vert_1;
+						dual.Cell1DsExtrema(m, 0) = vert_0; //Accesso più sicuro rispetto a quello con le "<<" di Eigen
+						dual.Cell1DsExtrema(m, 0) = vert_1;
 						m++;
 					}
 					
