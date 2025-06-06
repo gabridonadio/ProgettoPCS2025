@@ -679,6 +679,7 @@ namespace PolyhedralLibrary
 		
 		dual.Cell1DsId.reserve(dual.NumCell1Ds);
 		dual.Cell1DsExtrema.resize(dual.NumCell1Ds, 2);
+		cout << dual.Cell1DsExtrema.size() << endl;
 		
 		dual.Cell2DsId.reserve(dual.NumCell2Ds);
 		dual.Cell2DsEdges.resize(dual.NumCell2Ds);
@@ -801,35 +802,48 @@ namespace PolyhedralLibrary
 							
 						}
 					}
-					
-					
-					bool find = false;
-					unsigned int edge_0 = m;
-					unsigned int vert_0 = iter_face-F_initial;
-					unsigned int vert_1 = new_face_ad-F_initial;
-					for(auto& iter : dual.Cell1DsMarker[3])
-					{
-						// cerchiamo se esiste il lato con estremi vert_0 e vert_1 tra quelli con marker 3
-						if((dual.Cell1DsExtrema(iter, 0) == vert_0 && mesh.Cell1DsExtrema(iter, 1) == vert_1)||(mesh.Cell1DsExtrema(iter, 0) == vert_1 && mesh.Cell1DsExtrema(iter, 1) == vert_0))
-						{
-							edge_0 = iter;
-							find = true;
-						}
-					}
-					
-					if(not find && m < dual.NumCell1Ds) //aggiunto controllo su m
-					{
-						dual.Cell1DsMarker[3].push_back(m);
-						dual.Cell1DsId.push_back(m);
-						// baricentro di faccia iter_face è iter_face-F_initial
-						dual.Cell1DsExtrema(m, 0) = vert_0; //Accesso più sicuro rispetto a quello con le "<<" di Eigen
-						dual.Cell1DsExtrema(m, 0) = vert_1;
-						m++;
-					}
-					
-					edges.push_back(edge_0);
-					
 				}
+					
+					
+					
+				bool find = false;
+				unsigned int edge_0 = m;
+				unsigned int vert_0 = iter_face-F_initial;
+				cout << "vert_0 " << vert_0 << endl;
+				unsigned int vert_1 = new_face_ad-F_initial;
+				cout << "vert_1 " << vert_1 << endl;
+				cout<< "iter "<<endl;
+				for(unsigned int iter = 0; iter < dual.Cell1DsId.size(); iter++)
+				{
+					cout  << iter << endl;
+					/*cout << "Extrema "<< endl;
+					for(unsigned int i = 0; i < dual.Cell1DsExtrema.size()/2; i++)
+					{
+						cout << dual.Cell1DsExtrema(i, 0) << " " << dual.Cell1DsExtrema(i,1) << endl;
+					}*/
+					// cerchiamo se esiste il lato con estremi vert_0 e vert_1 tra quelli con marker 3
+					if((dual.Cell1DsExtrema(iter, 0) == vert_0 && dual.Cell1DsExtrema(iter , 1) == vert_1)||(dual.Cell1DsExtrema(iter, 0) == vert_1 && dual.Cell1DsExtrema(iter, 1) == vert_0))
+					{
+						edge_0 = dual.Cell1DsId[iter];
+						find = true;
+						break;
+					}
+				}
+				
+				if(not find) //aggiunto controllo su m
+				{
+					dual.Cell1DsId.push_back(m);
+					// baricentro di faccia iter_face è iter_face-F_initial
+					dual.Cell1DsExtrema(m, 0) = vert_0; //Accesso più sicuro rispetto a quello con le "<<" di Eigen
+					dual.Cell1DsExtrema(m, 1) = vert_1;
+					cout << vertex << endl;
+					cout << "m " << m <<endl;
+					edge_0 = m;
+					m++;
+				}
+				
+				edges.push_back(edge_0);
+					
 				
 				id_past = iter_face;
 				iter_face = new_face_ad;
@@ -840,6 +854,10 @@ namespace PolyhedralLibrary
 			dual.Cell2DsEdges[vertex] = edges;
 			cout << "vertices" << endl;
 			for(const auto& it: vertices)
+				cout<< it << " ";
+			cout << endl;
+			cout << "edges" <<endl;
+			for(const auto& it: edges)
 				cout<< it << " ";
 			cout << endl;
 		}

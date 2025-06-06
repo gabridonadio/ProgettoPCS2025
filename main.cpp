@@ -140,12 +140,14 @@ int main(int argc, char *argv[])
 	unsigned int E;
 	unsigned int F;
 	unsigned int E_initial;	
+	unsigned int F_initial ;
 	if(p==3 && q==3)
 		{
 			V = 2*T + 2;
 			E = 6*T;
 			F = 4*T;
 			E_initial = 6;
+			F_initial = 4;
 			
 		}
 		
@@ -155,6 +157,7 @@ int main(int argc, char *argv[])
 			E = 12*T;
 			F = 8*T;
 			E_initial = 12;
+			F_initial = 8; 
 		}
 		
 		if((p==3 && q==5)||(p==5 && q==3))
@@ -163,6 +166,7 @@ int main(int argc, char *argv[])
 			E = 30*T;
 			F = 20*T;
 			E_initial = 30;
+			F_initial = 20;
 		}
 		
 	PolyhedralMesh dual;
@@ -172,15 +176,15 @@ int main(int argc, char *argv[])
 		Dual(mesh, dual, 0, 0);
 	
 	Gedim::UCDUtilities utilities;
-	Eigen::MatrixXd points = mesh.Cell0DsCoordinates.topRows(mesh.NumCell0Ds).transpose();
+	Eigen::MatrixXd points = dual.Cell0DsCoordinates.topRows(dual.NumCell0Ds).transpose();
 	Eigen::MatrixXi segments;
 	if(b!=1)
 	{
-		segments = mesh.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()-E_initial).transpose();
+		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()-F_initial).transpose();
 	}
 	else
 	{
-		segments = mesh.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
+		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
 	}
 	utilities.ExportPoints("./Cell0Ds.inp", points);
 
