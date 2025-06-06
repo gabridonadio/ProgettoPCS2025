@@ -127,13 +127,13 @@ int main(int argc, char *argv[])
 	
 	// Visual test 
 	
-	for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
+	/*for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
 	{
 		double norma = mesh.Cell0DsCoordinates.row(i).norm();
 		mesh.Cell0DsCoordinates(i,0) /= norma;
 		mesh.Cell0DsCoordinates(i,1) /= norma;
 		mesh.Cell0DsCoordinates(i,2) /= norma;
-	}
+	}*/
 	 
 	unsigned int T = b*b + b*c + c*c;
 	unsigned int V;
@@ -175,12 +175,21 @@ int main(int argc, char *argv[])
 	else
 		Dual(mesh, dual, 0, 0);
 	
+	
+	for (unsigned int i=0; i<dual.NumCell0Ds; i++)
+	{
+		double norma = dual.Cell0DsCoordinates.row(i).norm();
+		dual.Cell0DsCoordinates(i,0) /= norma;
+		dual.Cell0DsCoordinates(i,1) /= norma;
+		dual.Cell0DsCoordinates(i,2) /= norma;
+	}
+	
 	Gedim::UCDUtilities utilities;
 	Eigen::MatrixXd points = dual.Cell0DsCoordinates.topRows(dual.NumCell0Ds).transpose();
 	Eigen::MatrixXi segments;
 	if(b!=1)
 	{
-		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()-F_initial).transpose();
+		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
 	}
 	else
 	{
