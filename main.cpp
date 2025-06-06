@@ -107,34 +107,13 @@ int main(int argc, char *argv[])
 		return 7;
 	}
 	
-	PolyhedralMesh mesh;
-	BuildPolyhedron(mesh, p, q);
-	
-	Triangulation_I(mesh, p, q, b, c);
-	
-	/*for(unsigned int i=0; i < mesh.NumCell0Ds; i++) {
-		for(unsigned int j=0; j <3; j++)
-			cout << mesh.Cell0DsCoordinates(i,j) << " ";
-		cout << endl;
-	}
-	unsigned int count = 0;
-	for(auto iter=mesh.Cell1DsMarker[2].begin(); iter !=mesh.Cell1DsMarker[2].end(); iter++)
-		count++;
-	cout << "count "<< count << endl;
-	
-	for(unsigned int i = 0; i<mesh.NumCell1Ds; i++)
-		cout << mesh.Cell1DsExtrema(i, 0) << ", " << mesh.Cell1DsExtrema(i, 1) << endl;*/
-	
-	// Visual test 
-	
-	/*for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
+	if(b == c)
 	{
-		double norma = mesh.Cell0DsCoordinates.row(i).norm();
-		mesh.Cell0DsCoordinates(i,0) /= norma;
-		mesh.Cell0DsCoordinates(i,1) /= norma;
-		mesh.Cell0DsCoordinates(i,2) /= norma;
-	}*/
-	 
+		cerr << "Class II not available" << endl;
+		return 8;
+	}
+	
+	
 	unsigned int T = b*b + b*c + c*c;
 	unsigned int V;
 	unsigned int E;
@@ -169,38 +148,75 @@ int main(int argc, char *argv[])
 			F_initial = 20;
 		}
 		
-	PolyhedralMesh dual;
-	if(b!=1)
-		Dual(mesh, dual, E_initial, F/T);
-	else
-		Dual(mesh, dual, 0, 0);
+		
+	PolyhedralMesh mesh;
+	BuildPolyhedron(mesh, p, q);
+	Triangulation_I(mesh, p, q, b, c);
 	
-	
-	for (unsigned int i=0; i<dual.NumCell0Ds; i++)
-	{
-		double norma = dual.Cell0DsCoordinates.row(i).norm();
-		dual.Cell0DsCoordinates(i,0) /= norma;
-		dual.Cell0DsCoordinates(i,1) /= norma;
-		dual.Cell0DsCoordinates(i,2) /= norma;
-	}
 	
 	Gedim::UCDUtilities utilities;
-	Eigen::MatrixXd points = dual.Cell0DsCoordinates.topRows(dual.NumCell0Ds).transpose();
-	Eigen::MatrixXi segments;
-	if(b!=1)
+	
+	if(p == 3)
 	{
-		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
+		for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
+		{
+			double norma = mesh.Cell0DsCoordinates.row(i).norm();
+			mesh.Cell0DsCoordinates(i,0) /= norma;
+			mesh.Cell0DsCoordinates(i,1) /= norma;
+			mesh.Cell0DsCoordinates(i,2) /= norma;
+		}
+		
+		Eigen::MatrixXd points = mesh.Cell0DsCoordinates.topRows(mesh.NumCell0Ds).transpose();
+		Eigen::MatrixXi segments;
+		if(b!=1)
+		{
+			segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()-E_initial).transpose();
+		}
+		else
+		{
+			segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()).transpose();
+		}
+		
+		utilities.ExportPoints("./Cell0Ds.inp", points);
+		utilities.ExportSegments("./Cell1Ds.inp", points, segments);
+		ExportMesh(mesh, "./mesh_");
 	}
 	else
 	{
-		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
+		PolyhedralMesh dual;
+		
+		if(b!=1)
+			Dual(mesh, dual, E_initial, F/T);
+		else
+			Dual(mesh, dual, 0, 0);
+		
+		
+		for (unsigned int i=0; i<dual.NumCell0Ds; i++)
+		{
+			double norma = dual.Cell0DsCoordinates.row(i).norm();
+			dual.Cell0DsCoordinates(i,0) /= norma;
+			dual.Cell0DsCoordinates(i,1) /= norma;
+			dual.Cell0DsCoordinates(i,2) /= norma;
+		}
+		
+		Eigen::MatrixXd points = dual.Cell0DsCoordinates.topRows(dual.NumCell0Ds).transpose();
+		Eigen::MatrixXi segments;
+		if(b!=1)
+		{
+			segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
+		}
+		else
+		{
+			segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
+		}
+		
+		utilities.ExportPoints("./Cell0Ds.inp", points);
+		utilities.ExportSegments("./Cell1Ds.inp", points, segments);
+		ExportMesh(dual, "./dual_");
 	}
-	utilities.ExportPoints("./Cell0Ds.inp", points);
-
-	utilities.ExportSegments("./Cell1Ds.inp", points, segments);
-
-	ExportMesh(dual, "./dual_");
-	//ExportMesh(mesh, "./mesh_");
+	
+	
+	
 
 	
 	return 0;
