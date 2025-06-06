@@ -833,7 +833,7 @@ namespace PolyhedralLibrary
 				
 				if(not find) //aggiunto controllo su m
 				{
-					dual.Cell1DsId.push_back(m);
+					dual.Cell1DsId.push_back(edge_0);
 					// baricentro di faccia iter_face è iter_face-F_initial
 					dual.Cell1DsExtrema(m, 0) = vert_0; //Accesso più sicuro rispetto a quello con le "<<" di Eigen
 					dual.Cell1DsExtrema(m, 1) = vert_1;
