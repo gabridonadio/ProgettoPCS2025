@@ -199,6 +199,9 @@ int main(int argc, char *argv[])
 
 	utilities.ExportSegments("./Cell1Ds.inp", points, segments);
 
+	ExportMesh(dual, "./dual_");
+	//ExportMesh(mesh, "./mesh_");
+
 	
 	return 0;
 }
