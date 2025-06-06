@@ -882,12 +882,14 @@ namespace PolyhedralLibrary
 	{
     // Export Cell0Ds
     ofstream cell0DsFile(basePath + "Cell0Ds.txt");
-    if (!cell0DsFile.is_open()) {
+    if (!cell0DsFile.is_open()) 
+	{
         cerr << "Error opening Cell0Ds.txt" << endl;
         return;
     }
     cell0DsFile << "Id;X;Y;Z" << endl;
-    for (unsigned int i = 0; i < mesh.NumCell0Ds; i++) {
+    for (unsigned int i = 0; i < mesh.NumCell0Ds; i++) 
+	{
         cell0DsFile << mesh.Cell0DsId[i] << ";"
                     << fixed << setprecision(12) << mesh.Cell0DsCoordinates(i, 0) << ";"
                     << mesh.Cell0DsCoordinates(i, 1) << ";"
@@ -897,12 +899,14 @@ namespace PolyhedralLibrary
 
     // Export Cell1Ds
     ofstream cell1DsFile(basePath + "Cell1Ds.txt");
-    if (!cell1DsFile.is_open()) {
+    if (!cell1DsFile.is_open()) 
+	{
         cerr << "Error opening Cell1Ds.txt" << endl;
         return;
     }
     cell1DsFile << "Id;Origin;End" << endl;
-    for (unsigned int i = 0; i < mesh.NumCell1Ds; i++) {
+    for (unsigned int i = 0; i < mesh.NumCell1Ds; i++) 
+	{
         cell1DsFile << mesh.Cell1DsId[i] << ";"
                     << mesh.Cell1DsExtrema(i, 0) << ";"
                     << mesh.Cell1DsExtrema(i, 1) << endl;
@@ -911,16 +915,19 @@ namespace PolyhedralLibrary
 
     // Export Cell2Ds
     ofstream cell2DsFile(basePath + "Cell2Ds.txt");
-    if (!cell2DsFile.is_open()) {
+    if (!cell2DsFile.is_open()) 
+	{
         cerr << "Error opening Cell2Ds.txt" << endl;
         return;
     }
     cell2DsFile << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;
-    for (unsigned int i = 0; i < mesh.NumCell2Ds; i++) {
+    for (unsigned int i = 0; i < mesh.NumCell2Ds; i++) 
+	{
         cell2DsFile << mesh.Cell2DsId[i] << ";"
                     << mesh.Cell2DsVertices[i].size() << ";";
         // Vertici
-        for (size_t j = 0; j < mesh.Cell2DsVertices[i].size(); j++) {
+        for (size_t j = 0; j < mesh.Cell2DsVertices[i].size(); j++) 
+		{
             cell2DsFile << mesh.Cell2DsVertices[i][j];
             if (j != mesh.Cell2DsVertices[i].size() - 1)
                 cell2DsFile << ",";
@@ -928,7 +935,8 @@ namespace PolyhedralLibrary
         cell2DsFile << ";"
                     << mesh.Cell2DsEdges[i].size() << ";";
         // Lati
-        for (size_t j = 0; j < mesh.Cell2DsEdges[i].size(); j++) {
+        for (size_t j = 0; j < mesh.Cell2DsEdges[i].size(); j++) 
+		{
             cell2DsFile << mesh.Cell2DsEdges[i][j];
             if (j != mesh.Cell2DsEdges[i].size() - 1)
                 cell2DsFile << ",";
@@ -937,13 +945,44 @@ namespace PolyhedralLibrary
     }
     cell2DsFile.close();
 
-    // Export Cell3Ds (empty for now as per project requirements)
+    // Export Cell3Ds
     ofstream cell3DsFile(basePath + "Cell3Ds.txt");
-    if (!cell3DsFile.is_open()) {
+    if (!cell3DsFile.is_open()) 
+	{
         cerr << "Error opening Cell3Ds.txt" << endl;
         return;
     }
     cell3DsFile << "Id;NumVertices;Vertices;NumEdges;Edges;NumFaces;Faces" << endl;
+	cell3DsFile << 1 << ";";
+	// Vertici
+	cell3DsFile << mesh.NumCell0Ds << ";";
+	for(size_t j = 0; j < mesh.NumCell0Ds; j++)
+	{
+		cell3DsFile << mesh.Cell0DsId[j];
+		if(j != mesh.NumCell0Ds) 
+			cell3DsFile << ",";
+	}
+	cell3DsFile << ";";
+	// Lati
+	cell3DsFile << mesh.NumCell1Ds << ";";
+	// DA SISTEMARE, CI SONO DUPLICATI NEGLI EDGES, A PARTIRE DA 13
+	for(size_t j = 0; j < mesh.NumCell1Ds; j++)
+	{
+		cell3DsFile << mesh.Cell1DsId[j];
+		cout << mesh.Cell1DsId[j] << endl;
+		if(j != mesh.NumCell1Ds - 1) 
+			cell3DsFile << ",";
+	}
+	cell3DsFile << ";";
+	// Facce
+	cell3DsFile << mesh.NumCell2Ds << ";";
+	for(size_t j = 0; j < mesh.NumCell2Ds; j++)
+	{
+		cell3DsFile << mesh.Cell2DsId[j];
+		if(j != mesh.NumCell2Ds - 1)
+			cell3DsFile << ",";
+	} 
+	cell3DsFile<< ";";
     cell3DsFile.close();
 	}
 }
