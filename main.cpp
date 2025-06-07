@@ -97,9 +97,6 @@ int main(int argc, char *argv[])
 		}
 		
 		
-		
-		// DA FARE ANCORA CONTROLLO SU ID_ORIGIN E END CONTROLLANDO CHE SIANO ID DISPONIBILI (ABBIAMO GIA p,q,b,c)
-        
     }
 	else
 	{
@@ -158,6 +155,16 @@ int main(int argc, char *argv[])
 	
 	if(p == 3)
 	{
+		if(argc == 7 && b!=1)
+		{
+			ShortestPath(mesh, id_origin, id_end, E_initial);
+		}
+		else if(argc == 7 && b==1)
+		{
+			ShortestPath(mesh, id_origin, id_end, 0);
+		}
+		
+		
 		for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
 		{
 			double norma = mesh.Cell0DsCoordinates.row(i).norm();

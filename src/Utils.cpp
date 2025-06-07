@@ -4,6 +4,7 @@
 #include <sstream>
 #include <unordered_set>
 #include <iomanip>
+#include <queue>
 
 using namespace std;
 
@@ -874,7 +875,6 @@ namespace PolyhedralLibrary
 		
 	}
 
-
 	void ExportMesh(PolyhedralMesh& mesh, string basePath) 
 	{
     // Export Cell0Ds
@@ -982,4 +982,93 @@ namespace PolyhedralLibrary
 	cell3DsFile<< ";";
     cell3DsFile.close();
 	}
+	
+	void ShortestPath(PolyhedralMesh& mesh, const int id_origin, const int id_end, const unsigned int E_initial)
+	{
+		// creo la lista di adiacenza
+		vector<list<unsigned int>> LA;
+		unsigned int n = mesh.NumCell0Ds;
+		LA.resize(n);
+		
+		// per ogni nodo del grafo ...
+		for(unsigned int i = 0; i < n; i++)
+		{			
+			list<unsigned int> list_ad;
+			// ... cerco i nodi ad esso connessi
+			for(unsigned int j = E_initial; j < mesh.NumCell1Ds; j++)
+			{
+				// se uno degli estremi del lato è i, allora l'altro estremo dello stesso lato è adiacente a i
+				if(mesh.Cell1DsExtrema(j, 0) == i)
+				{
+					list_ad.push_back(mesh.Cell1DsExtrema(j, 1));
+				}
+				else if(mesh.Cell1DsExtrema(j, 1) == i)
+				{
+					list_ad.push_back(mesh.Cell1DsExtrema(j, 0));
+				}
+			}
+			
+			LA[i] = list_ad;
+		}
+		
+		/*cout << "LA" << endl;
+		for(unsigned int i = 0; i < n; i++)
+		{
+			for(const auto& it: LA[i])
+				cout << it << " ";
+			cout << endl;
+		}*/
+		
+		// BFS
+		vector<bool> reached(n);
+		vector<unsigned int> pred(n);
+		queue<unsigned int> Q;
+		for(unsigned int i = 0; i < n; i++)
+		{
+			reached[i] = false;
+			pred[i] = -1;
+		}
+		
+		Q.push(id_origin);
+		while(not Q.empty() && not reached[id_end])
+		{
+			unsigned int u = Q.front();
+			Q.pop();
+			reached[u] = true;
+			pred[u] = u;
+			for(const auto& w: LA[u])
+			{
+				if(not reached[w])
+				{
+					Q.push(w);
+					pred[w] = u;
+				}
+			}
+		}
+		
+		cout << "path: ";
+		// ricostruisco il percorso a ritroso
+		list<unsigned int> path;
+		path.push_front(id_end);
+		unsigned int new_id_end = id_end;
+		bool found = false;
+		while(not found)
+		{
+			path.push_front(pred[new_id_end]);
+			new_id_end = pred[new_id_end];
+			
+			if(new_id_end == id_origin)
+				found = true;
+		}
+		
+		for(const auto& el: path)
+			cout << el << " ";
+			
+			
+		
+		
+	}
+	
+	
+	
 }
