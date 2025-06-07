@@ -284,7 +284,7 @@ namespace PolyhedralLibrary
 	
 	// Suppongo di aver già controllato che uno tra b e c sia uguale a 0 e l'altro >= 1
 	// Triangolazione caso b = 0 oppure c = 0
-	/*void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, int b, int c)
+	void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, int b, int c)
 	{
 		unsigned int T = b*b + b*c + c*c;
 		unsigned int V;
@@ -379,7 +379,7 @@ namespace PolyhedralLibrary
 
 					if (iter_2DMark == mesh.Cell1DsMarker[key].end()) {
 						// Nella lista associata al marker key non c'è il lato cercato, cioè il lato non è ancora stato diviso
-						*
+						*/
 						// DIVIDO IL LATO
 						unsigned int vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
 						unsigned int vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
@@ -531,7 +531,6 @@ namespace PolyhedralLibrary
 					mesh.Cell1DsExtrema(m, 0) = vert_1;
 					mesh.Cell1DsExtrema(m, 1) = vert_2;
 					unsigned int edge_1 = m;
-					mesh.Cell1DsId.push_back(edge_1);
 					if(liv == b-j-1)
 					{
 						bool found = false;
@@ -566,7 +565,6 @@ namespace PolyhedralLibrary
 					mesh.Cell1DsExtrema(m, 0) = vert_2;
 					mesh.Cell1DsExtrema(m, 1) = vert_0;
 					unsigned int edge_2 = m;
-					mesh.Cell1DsId.push_back(edge_2);
 					if(j == 0)
 					{
 						bool found = false;
@@ -653,7 +651,7 @@ namespace PolyhedralLibrary
 				cout << "vertices_per face " << i << " " << endl;
 				for(unsigned int j = 0; j <b+1-i; j++)
 					cout << vertices_per_face[i][j] << ", " << endl; 
-			}*
+			}*/
 			
 		}
 		cout << "n: " << n << endl;
@@ -662,9 +660,9 @@ namespace PolyhedralLibrary
 		mesh.NumCell0Ds = n;
 		mesh.NumCell1Ds = m;
 		mesh.NumCell2Ds = f;
-	}*/
+	}
 
-void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, int b, int c)
+/*void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, int b, int c)
 {
     unsigned int T = b * b + b * c + c * c;
     unsigned int V, E, F;
@@ -932,7 +930,7 @@ void Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, int b, int 
     mesh.NumCell0Ds = n;
     mesh.NumCell1Ds = m;
     mesh.NumCell2Ds = f;
-}
+}*/
 
 
 	
