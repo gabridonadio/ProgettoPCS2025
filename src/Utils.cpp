@@ -369,83 +369,65 @@ namespace PolyhedralLibrary
 			
 			for(unsigned int vertex = 0; vertex < 3; vertex++)
 			{
-				// Controllo che il lato non sia ancora stato diviso
-				// Controllo che esista la chiave 2 per i lati già divisi
-				/*key = 2;
-				// Se c'è la key allora entra nell'if
-				if (auto mesh.Cell1DsMarker.find(key) != mesh.Cell1DsMarker.end()) {
-					
-					// Cerco il lato di ID Cell2DsEdges[face][vertex] nella lista associata al marker key
-					auto iter_2DMark = find(mesh.Cell1DsMarker[key].begin(), mesh.Cell1DsMarker[key].end(), mesh.Cell2DsEdges[face][vertex]);
-
-					if (iter_2DMark == mesh.Cell1DsMarker[key].end()) {
-						// Nella lista associata al marker key non c'è il lato cercato, cioè il lato non è ancora stato diviso
-						*/
-						// DIVIDO IL LATO
-						unsigned int vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
-						unsigned int vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
+				
+				// DIVIDO IL LATO
+				unsigned int vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
+				unsigned int vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
+				
+				double x_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 0);
+				double y_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 1);
+				double z_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 2);
+				
+				double x_end = mesh.Cell0DsCoordinates(vertex_end_ID, 0);
+				double y_end = mesh.Cell0DsCoordinates(vertex_end_ID, 1);
+				double z_end = mesh.Cell0DsCoordinates(vertex_end_ID, 2); 
+				
+				Eigen::Vector3d vector_edge;
+				vector_edge << x_end - x_origin,
+							   y_end - y_origin, 
+							   z_end - z_origin;
+				vector_edge /= b; // vettore direzione normalizzato
+				matrix_edges.row(vertex) = vector_edge;
+				// Creo i punti della triangolazione sui lati principali
+				// Cerco il lato di ID Cell2DsEdges[face][vertex] nel vettore associato al marker 2
+				auto iter_2DMark = find(mesh.Cell1DsMarker[2].begin(), mesh.Cell1DsMarker[2].end(), mesh.Cell2DsEdges[face][vertex]);
+				// iter_2DMark != mesh.Cell1DsMarker[2].end()
+				if (iter_2DMark != mesh.Cell1DsMarker[2].end()){
+					for(unsigned int i = 1; i < b; i++) 
+					{
+						//cout << "vertex" << vertex << endl;
+						double x_sudd = x_origin + vector_edge(0)*i;
+						double y_sudd = y_origin + vector_edge(1)*i;
+						double z_sudd = z_origin + vector_edge(2)*i;
 						
-						double x_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 0);
-						double y_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 1);
-						double z_origin = mesh.Cell0DsCoordinates(vertex_origin_ID, 2);
+						bool found = false;
+						unsigned int ind = 0;
 						
-						double x_end = mesh.Cell0DsCoordinates(vertex_end_ID, 0);
-						double y_end = mesh.Cell0DsCoordinates(vertex_end_ID, 1);
-						double z_end = mesh.Cell0DsCoordinates(vertex_end_ID, 2); 
-						
-						Eigen::Vector3d vector_edge;
-						vector_edge << x_end - x_origin,
-									   y_end - y_origin, 
-									   z_end - z_origin;
-						vector_edge /= b; // vettore direzione normalizzato
-						matrix_edges.row(vertex) = vector_edge;
-						// Creo i punti della triangolazione sui lati principali
-						// Cerco il lato di ID Cell2DsEdges[face][vertex] nel vettore associato al marker 2
-						auto iter_2DMark = find(mesh.Cell1DsMarker[2].begin(), mesh.Cell1DsMarker[2].end(), mesh.Cell2DsEdges[face][vertex]);
-						// iter_2DMark != mesh.Cell1DsMarker[2].end()
-						if (iter_2DMark != mesh.Cell1DsMarker[2].end()){
-							for(unsigned int i = 1; i < b; i++) 
-							{
-								//cout << "vertex" << vertex << endl;
-								double x_sudd = x_origin + vector_edge(0)*i;
-								double y_sudd = y_origin + vector_edge(1)*i;
-								double z_sudd = z_origin + vector_edge(2)*i;
-								
-								bool found = false;
-								unsigned int ind = 0;
-								
-								// recupero gli id dei vertici della suddivisone dei lati principali
-								unsigned int id_found;
-								while(not found){
-									if(abs(mesh.Cell0DsCoordinates(ind,0)-x_sudd) < 1e-12 && abs(mesh.Cell0DsCoordinates(ind,1)-y_sudd) < 1e-12 && abs(mesh.Cell0DsCoordinates(ind,2)-z_sudd) < 1e-12) {
-										id_found = mesh.Cell0DsId[ind];
-										found = true;
-									}
-									ind++;
-								}
-								id_vertices_suddivisione[vertex][i-1] = id_found;
+						// recupero gli id dei vertici della suddivisone dei lati principali
+						unsigned int id_found;
+						while(not found){
+							if(abs(mesh.Cell0DsCoordinates(ind,0)-x_sudd) < 1e-12 && abs(mesh.Cell0DsCoordinates(ind,1)-y_sudd) < 1e-12 && abs(mesh.Cell0DsCoordinates(ind,2)-z_sudd) < 1e-12) {
+								id_found = mesh.Cell0DsId[ind];
+								found = true;
 							}
-								
+							ind++;
 						}
-						else{
-							for(unsigned int i = 1; i < b; i++) 
-							{
-								mesh.Cell0DsCoordinates(n, 0) = x_origin + vector_edge(0)*i;
-								mesh.Cell0DsCoordinates(n, 1) = y_origin + vector_edge(1)*i;
-								mesh.Cell0DsCoordinates(n, 2) = z_origin + vector_edge(2)*i;
-								mesh.Cell0DsId.push_back(n);
-								id_vertices_suddivisione[vertex][i-1] = n;
-								n++;
-							}
-							mesh.Cell1DsMarker[2].push_back(mesh.Cell2DsEdges[face][vertex]);
-						}
+						id_vertices_suddivisione[vertex][i-1] = id_found;
+					}
 						
-							
-							
-						
-						
-					//}
-				//}
+				}
+				else{
+					for(unsigned int i = 1; i < b; i++) 
+					{
+						mesh.Cell0DsCoordinates(n, 0) = x_origin + vector_edge(0)*i;
+						mesh.Cell0DsCoordinates(n, 1) = y_origin + vector_edge(1)*i;
+						mesh.Cell0DsCoordinates(n, 2) = z_origin + vector_edge(2)*i;
+						mesh.Cell0DsId.push_back(n);
+						id_vertices_suddivisione[vertex][i-1] = n;
+						n++;
+					}
+					mesh.Cell1DsMarker[2].push_back(mesh.Cell2DsEdges[face][vertex]);
+				}
 
 			}
 			
@@ -604,7 +586,6 @@ namespace PolyhedralLibrary
 				}
 			}
 			
-			
 			// numero lati triangolazione: 3b(b+1)/2
 			//triangolazione seconda parte
 			for(unsigned int j = 0; j < b; j++)
@@ -678,7 +659,6 @@ namespace PolyhedralLibrary
 		
 		dual.Cell1DsId.reserve(dual.NumCell1Ds);
 		dual.Cell1DsExtrema.resize(dual.NumCell1Ds, 2);
-		cout << dual.Cell1DsExtrema.size() << endl;
 		
 		dual.Cell2DsId.reserve(dual.NumCell2Ds);
 		dual.Cell2DsEdges.resize(dual.NumCell2Ds);
@@ -808,19 +788,10 @@ namespace PolyhedralLibrary
 				bool find = false;
 				unsigned int edge_0 = m;
 				unsigned int vert_0 = iter_face-F_initial;
-				cout << "vert_0 " << vert_0 << endl;
 				unsigned int vert_1 = new_face_ad-F_initial;
-				cout << "vert_1 " << vert_1 << endl;
-				cout<< "iter "<<endl;
 				for(unsigned int iter = 0; iter < dual.Cell1DsId.size(); iter++)
 				{
-					cout  << iter << endl;
-					/*cout << "Extrema "<< endl;
-					for(unsigned int i = 0; i < dual.Cell1DsExtrema.size()/2; i++)
-					{
-						cout << dual.Cell1DsExtrema(i, 0) << " " << dual.Cell1DsExtrema(i,1) << endl;
-					}*/
-					// cerchiamo se esiste il lato con estremi vert_0 e vert_1 tra quelli con marker 3
+					// cerchiamo se esiste il lato con estremi vert_0 e vert_1
 					if((dual.Cell1DsExtrema(iter, 0) == vert_0 && dual.Cell1DsExtrema(iter , 1) == vert_1)||(dual.Cell1DsExtrema(iter, 0) == vert_1 && dual.Cell1DsExtrema(iter, 1) == vert_0))
 					{
 						edge_0 = dual.Cell1DsId[iter];
@@ -835,8 +806,6 @@ namespace PolyhedralLibrary
 					// baricentro di faccia iter_face è iter_face-F_initial
 					dual.Cell1DsExtrema(m, 0) = vert_0; //Accesso più sicuro rispetto a quello con le "<<" di Eigen
 					dual.Cell1DsExtrema(m, 1) = vert_1;
-					cout << vertex << endl;
-					cout << "m " << m <<endl;
 					edge_0 = m;
 					m++;
 				}
@@ -851,27 +820,7 @@ namespace PolyhedralLibrary
 			
 			dual.Cell2DsVertices[vertex] = vertices;
 			dual.Cell2DsEdges[vertex] = edges;
-			cout << "vertices" << endl;
-			for(const auto& it: vertices)
-				cout<< it << " ";
-			cout << endl;
-			cout << "edges" <<endl;
-			for(const auto& it: edges)
-				cout<< it << " ";
-			cout << endl;
-		}
-		
-		
-		
-		
-		for(unsigned int i = 0; i<mesh.NumCell0Ds; i++)
-		{
-			cout << "faccia "  << i << endl;
-			for(unsigned int j = 0; j< neighborhood_faces[i].size(); j++)
-				cout << neighborhood_faces[i][j] << " ";
-			cout << endl;
-		}
-		
+		}		
 		
 	}
 
@@ -981,6 +930,17 @@ namespace PolyhedralLibrary
 	} 
 	cell3DsFile<< ";";
     cell3DsFile.close();
+	}
+	
+	void SphereProjection(PolyhedralMesh& mesh)
+	{
+		for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
+		{
+			double norma = mesh.Cell0DsCoordinates.row(i).norm();
+			mesh.Cell0DsCoordinates(i,0) /= norma;
+			mesh.Cell0DsCoordinates(i,1) /= norma;
+			mesh.Cell0DsCoordinates(i,2) /= norma;
+		}
 	}
 	
 	void ShortestPath(PolyhedralMesh& mesh, const int id_origin, const int id_end, const unsigned int E_initial)

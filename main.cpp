@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 	Gedim::UCDUtilities utilities;
 	
 	if(p == 3)
-	{
+	{/*
 		if(argc == 7 && b!=1)
 		{
 			ShortestPath(mesh, id_origin, id_end, E_initial);
@@ -162,16 +162,10 @@ int main(int argc, char *argv[])
 		else if(argc == 7 && b==1)
 		{
 			ShortestPath(mesh, id_origin, id_end, 0);
-		}
+		}*/
 		
-		
-		for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
-		{
-			double norma = mesh.Cell0DsCoordinates.row(i).norm();
-			mesh.Cell0DsCoordinates(i,0) /= norma;
-			mesh.Cell0DsCoordinates(i,1) /= norma;
-			mesh.Cell0DsCoordinates(i,2) /= norma;
-		}
+		// proietto sulla sfera
+		SphereProjection(mesh);
 		
 		Eigen::MatrixXd points = mesh.Cell0DsCoordinates.topRows(mesh.NumCell0Ds).transpose();
 		Eigen::MatrixXi segments;
@@ -197,14 +191,8 @@ int main(int argc, char *argv[])
 		else
 			Dual(mesh, dual, 0, 0);
 		
-		
-		for (unsigned int i=0; i<dual.NumCell0Ds; i++)
-		{
-			double norma = dual.Cell0DsCoordinates.row(i).norm();
-			dual.Cell0DsCoordinates(i,0) /= norma;
-			dual.Cell0DsCoordinates(i,1) /= norma;
-			dual.Cell0DsCoordinates(i,2) /= norma;
-		}
+		// proietto sulla sfera
+		SphereProjection(dual);
 		
 		Eigen::MatrixXd points = dual.Cell0DsCoordinates.topRows(dual.NumCell0Ds).transpose();
 		Eigen::MatrixXi segments;
