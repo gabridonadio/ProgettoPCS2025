@@ -153,16 +153,55 @@ int main(int argc, char *argv[])
 	
 	Gedim::UCDUtilities utilities;
 	
+	vector<Gedim::UCDProperty<double>> VShortestPath;
+	vector<Gedim::UCDProperty<double>> EShortestPath;
+	
 	if(p == 3)
-	{/*
-		if(argc == 7 && b!=1)
-		{
-			ShortestPath(mesh, id_origin, id_end, E_initial);
+	{
+		if(argc == 7)
+		{		
+			if(id_origin < 0 || id_origin >= mesh.NumCell0Ds || id_end < 0 || id_end >= mesh.NumCell0Ds)
+			{
+				cerr << "Invalid input: error in id_origin or id_end" << endl;
+				return 9;
+			}
+			
+			if(b!=1)
+			{
+				ShortestPath(mesh, id_origin, id_end, E_initial);
+			}
+			else if(b==1)
+			{
+				E_initial = 0;
+				cout << "before" << endl;
+				for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)
+				{
+					cout << mesh.Cell1DsExtrema(i,0) << ", " << mesh.Cell1DsExtrema(i,1) << endl;
+				}
+				cout << endl;
+				ShortestPath(mesh, id_origin, id_end, E_initial);
+				cout << "after" << endl;
+				for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)
+				{
+					cout << mesh.Cell1DsExtrema(i,0) << ", " << mesh.Cell1DsExtrema(i,1) << endl;
+				}
+				cout << endl;
+			}
+			
+			VShortestPath.resize(1);
+			VShortestPath[0].Label = "VerticesShortestPath";
+			VShortestPath[0].UnitLabel = "Id";
+			VShortestPath[0].Size = mesh.NumCell0Ds;
+			VShortestPath[0].NumComponents = 1;
+			VShortestPath[0].Data=mesh.VerticesShortestPath.data();
+
+			EShortestPath.resize(1);
+			EShortestPath[0].Label = "EdgesShortestPath";
+			EShortestPath[0].UnitLabel = "Id";
+			EShortestPath[0].Size = mesh.NumCell1Ds;
+			EShortestPath[0].NumComponents = 1;
+			EShortestPath[0].Data=mesh.EdgesShortestPath.data();
 		}
-		else if(argc == 7 && b==1)
-		{
-			ShortestPath(mesh, id_origin, id_end, 0);
-		}*/
 		
 		// proietto sulla sfera
 		SphereProjection(mesh);
@@ -178,9 +217,19 @@ int main(int argc, char *argv[])
 			segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()).transpose();
 		}
 		
-		utilities.ExportPoints("./Cell0Ds.inp", points);
-		utilities.ExportSegments("./Cell1Ds.inp", points, segments);
-		ExportMesh(mesh, "./mesh_");
+		
+		if(argc == 7)
+		{
+			utilities.ExportPoints("./Cell0Ds.inp", points, VShortestPath);
+			utilities.ExportSegments("./Cell1Ds.inp", points, segments, {}, EShortestPath);
+			ExportMesh(mesh, "./mesh_");
+		}
+		else
+		{
+			utilities.ExportPoints("./Cell0Ds.inp", points);
+			utilities.ExportSegments("./Cell1Ds.inp", points, segments);
+			ExportMesh(mesh, "./mesh_");
+		}
 	}
 	else
 	{
@@ -190,6 +239,40 @@ int main(int argc, char *argv[])
 			Dual(mesh, dual, E_initial, F/T);
 		else
 			Dual(mesh, dual, 0, 0);
+		
+		cout << "ok" << endl;
+		if(argc == 7)
+		{		
+			if(id_origin < 0 || id_origin >= dual.NumCell0Ds || id_end < 0 || id_end >= dual.NumCell0Ds)
+			{
+				cerr << "Invalid input: error in id_origin or id_end" << endl;
+				return 9;
+			}
+			
+			if(b!=1)
+			{
+				ShortestPath(dual, id_origin, id_end, 0);
+			}
+			else if(b==1)
+			{
+				E_initial = 0;
+				ShortestPath(dual, id_origin, id_end, E_initial);
+			}
+			
+			VShortestPath.resize(1);
+			VShortestPath[0].Label = "VerticesShortestPath";
+			VShortestPath[0].UnitLabel = "Id";
+			VShortestPath[0].Size = dual.NumCell0Ds;
+			VShortestPath[0].NumComponents = 1;
+			VShortestPath[0].Data=dual.VerticesShortestPath.data();
+
+			EShortestPath.resize(1);
+			EShortestPath[0].Label = "EdgesShortestPath";
+			EShortestPath[0].UnitLabel = "Id";
+			EShortestPath[0].Size = dual.NumCell1Ds;
+			EShortestPath[0].NumComponents = 1;
+			EShortestPath[0].Data=dual.EdgesShortestPath.data();
+		}
 		
 		// proietto sulla sfera
 		SphereProjection(dual);
@@ -205,9 +288,19 @@ int main(int argc, char *argv[])
 			segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
 		}
 		
-		utilities.ExportPoints("./Cell0Ds.inp", points);
-		utilities.ExportSegments("./Cell1Ds.inp", points, segments);
-		ExportMesh(dual, "./dual_");
+		
+		if(argc == 7)
+		{
+			utilities.ExportPoints("./Cell0Ds.inp", points, VShortestPath);
+			utilities.ExportSegments("./Cell1Ds.inp", points, segments, {}, EShortestPath);
+			ExportMesh(mesh, "./mesh_");
+		}
+		else
+		{
+			utilities.ExportPoints("./Cell0Ds.inp", points);
+			utilities.ExportSegments("./Cell1Ds.inp", points, segments);
+			ExportMesh(mesh, "./mesh_");
+		}
 	}
 	
 	

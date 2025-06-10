@@ -8,7 +8,6 @@
 
 namespace PolyhedralLibrary
 {
-	
 	// test per la correttezza dei poliedri creati con BuildPolyhedron
 	TEST(PolyhedralMeshTest, NoRepeatedVerticesPerFace)
 	{
@@ -157,6 +156,7 @@ namespace PolyhedralLibrary
 	}
 	
 	
+	
 	// test sul numero di vertici, lati e facce della mesh che deriva da Triangulation_I
 	TEST(PolyhedralMeshTest, NumVertices_Triangulation)
 	{
@@ -241,6 +241,76 @@ namespace PolyhedralLibrary
 		ASSERT_EQ(NumHighValence, NumHighValence_Teo);
 	}
 	
+	// test sulla coerenza dei segmenti e dei vertici dello shortest path
+	TEST(PolyhedralMeshTest, CheckShortestPath)
+	{
+		PolyhedralMesh mesh;
+		BuildPolyhedron(mesh, 3, 4);
+		cout << "lkl" << endl;
+		Triangulation_I(mesh, 3, 4, 5, 0);
+		cout << "ifj" << endl;
+		unsigned int E_initial = 12;
+		ShortestPath(mesh, 0, 42, E_initial);
+		cout << "jfhv" << endl;
+		bool ok = true;
+		unsigned int NumVertices = 0;
+		unsigned int NumEdges = 0;
+		vector<unsigned int> vertices;
+		vector<unsigned int> edges;
+		vertices.reserve(mesh.NumCell0Ds);
+		edges.reserve(mesh.NumCell0Ds); // ci dovranno essere vertices.size() - 1 edges
+		for(unsigned int i=0; i<mesh.NumCell0Ds; i++)
+		{
+			if(mesh.VerticesShortestPath[i]==1)
+			{
+				NumVertices++;
+				cout << "ok" << endl;
+				vertices.push_back(i);
+				cout << i << endl;
+			}
+		}
+		for(unsigned int j=0; j<mesh.NumCell1Ds-E_initial; j++)
+		{
+			if(mesh.EdgesShortestPath[j]==1)
+			{
+				NumEdges++;
+				edges.push_back(j+E_initial);
+				cout << j+E_initial << endl;
+			}
+		}
+		if(NumVertices!=(NumEdges+1))
+			ok = false;
+		
+		// se è già falso da prima, inutile fare altri controlli
+		if(ok)
+		{
+			for(const auto& vertex: vertices)
+			{
+				if(ok)
+				{
+					unsigned int count = 0;
+					
+					// verifichiamo in quanti lati di edges compare l'estremo vertex
+					for(const auto& edge: edges)
+					{
+						cout << "boh" << endl;
+						cout << mesh.Cell1DsExtrema(edge, 0) << " " << mesh.Cell1DsExtrema(edge, 1) << endl;
+						if(mesh.Cell1DsExtrema(edge, 0) == vertex || mesh.Cell1DsExtrema(edge, 1) == vertex)
+							count++;
+					}
+					
+					if(count < 1 && (vertex == 0 || vertex == 42))
+						ok = false;
+					else if(count < 2 && (vertex != 0 && vertex != 42))
+						ok = false;
+				}
+			}
+		}
+		
+		ASSERT_EQ(ok,true);
+
+	}
+	
 	
 	// test per il controllo dei punti sulla sfera della mesh
 	TEST(PolyhedralMeshTest, NormalizedVertices)
@@ -294,6 +364,8 @@ namespace PolyhedralLibrary
 	}
 	
 	
+	
+	
 	// test su lati irrealizzabili nel duale (origine coincide con fine)
 	TEST(PolyhedralMeshTest, OriginEqualsEnd_Duale)
 	{
@@ -316,53 +388,6 @@ namespace PolyhedralLibrary
 	}
 	
 	
-	/*
-	// test sulla coerenza dei segmenti e dei vertici dello shortest path
-	TEST(PolyhedronMeshTest, ControlloShortestPath)
-	{
-		PolyhedralMesh mesh;
-		BuildPolyhedron(mesh, 3, 4);
-		Triangulation_I(mesh, 3, 4, 5, 0);
-		ShortestPath(mesh, 0, 42, 12);
-		bool ok = true;
-		unsigned int NumVertices = 0;
-		unsigned int n_lati = 0;
-		for(unsigned int i=0;i<mesh.NumCell0Ds;i++)
-		{
-			if(mesh.VerticesInShortestPath[i]==1)
-			n_vertici++;
-		}
-		for(unsigned int k=0;k<mesh.NumCell1Ds;k++)
-		{
-			if(mesh.EdgesInShortestPath[k]==1)
-			n_lati++;
-		}
-		if(n_vertici!=(n_lati+1))
-		Corretto = false;
-		vector<bool> trovato;
-		trovato.reserve(n_vertici);
-		if(Corretto==true)
-		{
-			for(unsigned int i=0;i<mesh.NumCell0Ds;i++)//ciclo su tutti vertici
-			{
-				if(mesh.VerticesInShortestPath[i]==1)//cerco solo quelli in shortestpath
-				{
-					for(unsigned int k=0;k<mesh.NumCell1Ds;k++)//ciclo su lati
-					{
-						if(mesh.EdgesInShortestPath[k]==1)//cerco solo quelli in shortestpath
-						{
-							if(mesh.Cell1DsExtrema(0,k)==i || mesh.Cell1DsExtrema(1,k)==i)//controllo se vertice è in un estremo
-								trovato.push_back(true);
-						}
-					}
-				}
-			}
-		}
-		if(trovato.size()!=(2*n_vertici-2))
-			Corretto=false;
-		
-		ASSERT_EQ(Corretto,true);
-
-	}*/
+	
 	
 }

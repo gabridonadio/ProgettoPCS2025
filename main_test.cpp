@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "test_polyhedron.hpp"
+#include "TestPolyhedron.hpp"
 
 int main(int argc, char *argv[])
 {

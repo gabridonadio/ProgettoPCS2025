@@ -990,23 +990,23 @@ namespace PolyhedralLibrary
 		}
 		
 		Q.push(id_origin);
+		pred[id_origin] = id_origin;
 		while(not Q.empty() && not reached[id_end])
 		{
 			unsigned int u = Q.front();
 			Q.pop();
 			reached[u] = true;
-			pred[u] = u;
 			for(const auto& w: LA[u])
 			{
 				if(not reached[w])
 				{
+					reached[w] = true;
 					Q.push(w);
 					pred[w] = u;
 				}
 			}
 		}
 		
-		cout << "path: ";
 		// ricostruisco il percorso a ritroso
 		list<unsigned int> path;
 		path.push_front(id_end);
@@ -1021,9 +1021,48 @@ namespace PolyhedralLibrary
 				found = true;
 		}
 		
-		for(const auto& el: path)
-			cout << el << " ";
+		mesh.VerticesShortestPath.resize(mesh.NumCell0Ds);
+		for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)
+			mesh.VerticesShortestPath[i] = 0;
+		mesh.EdgesShortestPath.resize(mesh.NumCell1Ds-E_initial);
+		for(unsigned int j = 0; j < mesh.NumCell1Ds-E_initial; j++)
+			mesh.EdgesShortestPath[j] = 0;
+		unsigned int vert_0 = path.front();
+		unsigned int vert_1;
+		
+		// aggiungo primo elemento di path a VerticesShortestPath
+		mesh.VerticesShortestPath[vert_0] = 1;
+		
+		for(const auto& vertex: path)
+		{
+			// saltiamo la prima iterazione, per cui abbiamo già salvato vertex in vert_0
+			if(vertex == vert_0)
+				continue;
 			
+			vert_1 = vertex;
+			mesh.VerticesShortestPath[vert_1] = 1;
+			for(unsigned int edge = E_initial; edge < mesh.NumCell1Ds; edge++)
+			{
+				if((mesh.Cell1DsExtrema(edge, 0) == vert_0 && mesh.Cell1DsExtrema(edge, 1) == vert_1) || (mesh.Cell1DsExtrema(edge, 0) == vert_1 && mesh.Cell1DsExtrema(edge, 1) == vert_0))
+				{
+					mesh.EdgesShortestPath[edge-E_initial] = 1;
+					break;
+				}
+			}
+			
+			vert_0 = vert_1;
+			
+		}
+		
+		
+		
+		for(const auto& el: mesh.VerticesShortestPath)
+			cout << el << " ";
+		cout << endl;
+		
+		for(const auto& el: mesh.EdgesShortestPath)
+			cout << el << " ";
+		cout << endl;
 			
 		
 		

@@ -111,7 +111,7 @@ public:
                         const Eigen::MatrixXd& points,
                         const Eigen::MatrixXi& segments,
                         const std::vector<UCDProperty<double>>& points_properties = {},
-                        const std::vector<UCDProperty<double>>& segmnents_properties = {},
+                        const std::vector<UCDProperty<double>>& segments_properties = {},
                         const Eigen::VectorXi& materials = {}) const;
 
     void ExportPolygons(const std::string& filePath,

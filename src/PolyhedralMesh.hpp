@@ -28,7 +28,7 @@ namespace PolyhedralLibrary {
 		vector<vector<unsigned int>> Cell2DsEdges;
 		
 		
-		vector<unsigned int> VerticesShortestPath;
-		vector<unsigned int> EdgesShortestPath;
+		vector<double> VerticesShortestPath;
+		vector<double> EdgesShortestPath;
 	};
 }
