@@ -148,7 +148,8 @@ int main(int argc, char *argv[])
 		
 	PolyhedralMesh mesh;
 	BuildPolyhedron(mesh, p, q);
-	Triangulation_I(mesh, p, q, b, c);
+	if(max(b,c) != 1)
+		Triangulation_I(mesh, p, q, b, c);
 	
 	
 	Gedim::UCDUtilities utilities;
@@ -166,11 +167,11 @@ int main(int argc, char *argv[])
 				return 9;
 			}
 			
-			if(b!=1)
+			if(max(b,c)!=1)
 			{
 				ShortestPath(mesh, id_origin, id_end, E_initial);
 			}
-			else if(b==1)
+			else if(max(b,c)==1)
 			{
 				E_initial = 0;
 				cout << "before" << endl;
@@ -208,7 +209,7 @@ int main(int argc, char *argv[])
 		
 		Eigen::MatrixXd points = mesh.Cell0DsCoordinates.topRows(mesh.NumCell0Ds).transpose();
 		Eigen::MatrixXi segments;
-		if(b!=1)
+		if(max(b,c)!=1)
 		{
 			segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()-E_initial).transpose();
 		}
@@ -222,20 +223,28 @@ int main(int argc, char *argv[])
 		{
 			utilities.ExportPoints("./Cell0Ds.inp", points, VShortestPath);
 			utilities.ExportSegments("./Cell1Ds.inp", points, segments, {}, EShortestPath);
-			ExportMesh(mesh, "./mesh_");
 		}
 		else
 		{
 			utilities.ExportPoints("./Cell0Ds.inp", points);
 			utilities.ExportSegments("./Cell1Ds.inp", points, segments);
-			ExportMesh(mesh, "./mesh_");
+		}
+		if(max(b,c)!=1)
+		{
+			ExportMesh(mesh, "./mesh_", E_initial, F_initial);
+		}
+		else
+		{
+			E_initial = 0;
+			F_initial = 0;
+			ExportMesh(mesh, "./mesh_", E_initial, F_initial);
 		}
 	}
 	else
 	{
 		PolyhedralMesh dual;
 		
-		if(b!=1)
+		if(max(b,c)!=1)
 			Dual(mesh, dual, E_initial, F/T);
 		else
 			Dual(mesh, dual, 0, 0);
@@ -249,11 +258,11 @@ int main(int argc, char *argv[])
 				return 9;
 			}
 			
-			if(b!=1)
+			if(max(b,c)!=1)
 			{
 				ShortestPath(dual, id_origin, id_end, 0);
 			}
-			else if(b==1)
+			else if(max(b,c)==1)
 			{
 				E_initial = 0;
 				ShortestPath(dual, id_origin, id_end, E_initial);
@@ -279,28 +288,23 @@ int main(int argc, char *argv[])
 		
 		Eigen::MatrixXd points = dual.Cell0DsCoordinates.topRows(dual.NumCell0Ds).transpose();
 		Eigen::MatrixXi segments;
-		if(b!=1)
-		{
-			segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
-		}
-		else
-		{
-			segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
-		}
+		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
 		
 		
 		if(argc == 7)
 		{
 			utilities.ExportPoints("./Cell0Ds.inp", points, VShortestPath);
 			utilities.ExportSegments("./Cell1Ds.inp", points, segments, {}, EShortestPath);
-			ExportMesh(mesh, "./mesh_");
 		}
 		else
 		{
 			utilities.ExportPoints("./Cell0Ds.inp", points);
 			utilities.ExportSegments("./Cell1Ds.inp", points, segments);
-			ExportMesh(mesh, "./mesh_");
 		}
+		
+		E_initial = 0;
+		F_initial = 0;
+		ExportMesh(dual, "./dual_", E_initial, F_initial);
 	}
 	
 	

@@ -314,29 +314,25 @@ namespace PolyhedralLibrary
 			F = 20*T;
 		}
 		
-		if(b!=1)
-		{
-			mesh.Cell0DsId.reserve(V);
-			mesh.Cell1DsId.reserve(E+E/T);
-			mesh.Cell2DsId.reserve(F+F/T);
-			
-			mesh.Cell0DsCoordinates.conservativeResize(V, Eigen::NoChange);
-			mesh.Cell1DsExtrema.conservativeResize(E+E/T, Eigen::NoChange);
-			
-			mesh.Cell2DsVertices.reserve(F+F/T);
-			mesh.Cell2DsEdges.reserve(F+F/T);
-		}
+		
+		mesh.Cell0DsId.reserve(V);
+		mesh.Cell1DsId.reserve(E+E/T);
+		mesh.Cell2DsId.reserve(F+F/T);
+		
+		mesh.Cell0DsCoordinates.conservativeResize(V, Eigen::NoChange);
+		mesh.Cell1DsExtrema.conservativeResize(E+E/T, Eigen::NoChange);
+		
+		mesh.Cell2DsVertices.reserve(F+F/T);
+		mesh.Cell2DsEdges.reserve(F+F/T);
 		
 		b = max(b,c);
 		
 
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
 		array<vector<unsigned int>, 3> id_vertices_suddivisione;
-		if(b > 1)
+		for (auto& vec : id_vertices_suddivisione) 
 		{
-			for (auto& vec : id_vertices_suddivisione) {
-				vec.resize(b-1);
-			}
+			vec.resize(b-1);
 		}
 		
 		map<unsigned int, vector<unsigned int>> vertices_per_face;
@@ -351,8 +347,6 @@ namespace PolyhedralLibrary
 
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
-			if(b==1)
-				continue;
 			
 			// salvare le 3 direzioni del triangolo
 			Eigen::Matrix3d matrix_edges;
@@ -824,7 +818,7 @@ namespace PolyhedralLibrary
 		
 	}
 
-	void ExportMesh(PolyhedralMesh& mesh, string basePath) 
+	void ExportMesh(PolyhedralMesh& mesh, string basePath, const unsigned int E_initial, const unsigned int F_initial) 
 	{
     // Export Cell0Ds
     ofstream cell0DsFile(basePath + "Cell0Ds.txt");
@@ -851,7 +845,7 @@ namespace PolyhedralLibrary
         return;
     }
     cell1DsFile << "Id;Origin;End" << endl;
-    for (unsigned int i = 0; i < mesh.NumCell1Ds; i++) 
+    for (unsigned int i = E_initial; i < mesh.NumCell1Ds; i++) 
 	{
         cell1DsFile << mesh.Cell1DsId[i] << ";"
                     << mesh.Cell1DsExtrema(i, 0) << ";"
@@ -872,7 +866,7 @@ namespace PolyhedralLibrary
         cell2DsFile << mesh.Cell2DsId[i] << ";"
                     << mesh.Cell2DsVertices[i].size() << ";";
         // Vertici
-        for (size_t j = 0; j < mesh.Cell2DsVertices[i].size(); j++) 
+        for (size_t j = E_initial; j < mesh.Cell2DsVertices[i].size(); j++) 
 		{
             cell2DsFile << mesh.Cell2DsVertices[i][j];
             if (j != mesh.Cell2DsVertices[i].size() - 1)
@@ -881,7 +875,7 @@ namespace PolyhedralLibrary
         cell2DsFile << ";"
                     << mesh.Cell2DsEdges[i].size() << ";";
         // Lati
-        for (size_t j = 0; j < mesh.Cell2DsEdges[i].size(); j++) 
+        for (size_t j = F_initial; j < mesh.Cell2DsEdges[i].size(); j++) 
 		{
             cell2DsFile << mesh.Cell2DsEdges[i][j];
             if (j != mesh.Cell2DsEdges[i].size() - 1)
@@ -912,7 +906,7 @@ namespace PolyhedralLibrary
 	// Lati
 	cell3DsFile << mesh.NumCell1Ds << ";";
 	// DA SISTEMARE, CI SONO DUPLICATI NEGLI EDGES, A PARTIRE DA 13
-	for(size_t j = 0; j < mesh.NumCell1Ds; j++)
+	for(size_t j = E_initial; j < mesh.NumCell1Ds; j++)
 	{
 		cell3DsFile << mesh.Cell1DsId[j];
 		cout << mesh.Cell1DsId[j] << endl;
@@ -922,7 +916,7 @@ namespace PolyhedralLibrary
 	cell3DsFile << ";";
 	// Facce
 	cell3DsFile << mesh.NumCell2Ds << ";";
-	for(size_t j = 0; j < mesh.NumCell2Ds; j++)
+	for(size_t j = F_initial; j < mesh.NumCell2Ds; j++)
 	{
 		cell3DsFile << mesh.Cell2DsId[j];
 		if(j != mesh.NumCell2Ds - 1)
@@ -981,6 +975,7 @@ namespace PolyhedralLibrary
 		
 		// BFS
 		vector<bool> reached(n);
+		// vettore dei predecessori per la ricostruzione del cammino minimo
 		vector<unsigned int> pred(n);
 		queue<unsigned int> Q;
 		for(unsigned int i = 0; i < n; i++)
@@ -1008,6 +1003,7 @@ namespace PolyhedralLibrary
 		}
 		
 		// ricostruisco il percorso a ritroso
+		// lista per poter fare push_front
 		list<unsigned int> path;
 		path.push_front(id_end);
 		unsigned int new_id_end = id_end;
@@ -1021,16 +1017,20 @@ namespace PolyhedralLibrary
 				found = true;
 		}
 		
+		
+		// salvare il percorso in mesh
 		mesh.VerticesShortestPath.resize(mesh.NumCell0Ds);
 		for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)
 			mesh.VerticesShortestPath[i] = 0;
+		
 		mesh.EdgesShortestPath.resize(mesh.NumCell1Ds-E_initial);
 		for(unsigned int j = 0; j < mesh.NumCell1Ds-E_initial; j++)
 			mesh.EdgesShortestPath[j] = 0;
+		
 		unsigned int vert_0 = path.front();
 		unsigned int vert_1;
 		
-		// aggiungo primo elemento di path a VerticesShortestPath
+		// aggiorno elemento di VerticesShortestPath in posizione vert_0
 		mesh.VerticesShortestPath[vert_0] = 1;
 		
 		for(const auto& vertex: path)
@@ -1053,21 +1053,6 @@ namespace PolyhedralLibrary
 			vert_0 = vert_1;
 			
 		}
-		
-		
-		
-		for(const auto& el: mesh.VerticesShortestPath)
-			cout << el << " ";
-		cout << endl;
-		
-		for(const auto& el: mesh.EdgesShortestPath)
-			cout << el << " ";
-		cout << endl;
-			
-		
-		
 	}
-	
-	
 	
 }

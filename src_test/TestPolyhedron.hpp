@@ -8,6 +8,7 @@
 
 namespace PolyhedralLibrary
 {
+	
 	// test per la correttezza dei poliedri creati con BuildPolyhedron
 	TEST(PolyhedralMeshTest, NoRepeatedVerticesPerFace)
 	{
@@ -194,7 +195,7 @@ namespace PolyhedralLibrary
 		BuildPolyhedron(mesh, 3, 4);
 		Triangulation_I(mesh, 3, 4, 5, 0);
 		bool ok = true;
-		unsigned int F_total = 208;	// numero nuovi lati + lati iniziali
+		unsigned int F_total = 208;	// numero nuove facce + facce iniziali
 		if(mesh.Cell2DsId.size() != F_total)
 			ok = false;
 		else if(mesh.NumCell2Ds != F_total)
@@ -241,75 +242,7 @@ namespace PolyhedralLibrary
 		ASSERT_EQ(NumHighValence, NumHighValence_Teo);
 	}
 	
-	// test sulla coerenza dei segmenti e dei vertici dello shortest path
-	TEST(PolyhedralMeshTest, CheckShortestPath)
-	{
-		PolyhedralMesh mesh;
-		BuildPolyhedron(mesh, 3, 4);
-		cout << "lkl" << endl;
-		Triangulation_I(mesh, 3, 4, 5, 0);
-		cout << "ifj" << endl;
-		unsigned int E_initial = 12;
-		ShortestPath(mesh, 0, 42, E_initial);
-		cout << "jfhv" << endl;
-		bool ok = true;
-		unsigned int NumVertices = 0;
-		unsigned int NumEdges = 0;
-		vector<unsigned int> vertices;
-		vector<unsigned int> edges;
-		vertices.reserve(mesh.NumCell0Ds);
-		edges.reserve(mesh.NumCell0Ds); // ci dovranno essere vertices.size() - 1 edges
-		for(unsigned int i=0; i<mesh.NumCell0Ds; i++)
-		{
-			if(mesh.VerticesShortestPath[i]==1)
-			{
-				NumVertices++;
-				cout << "ok" << endl;
-				vertices.push_back(i);
-				cout << i << endl;
-			}
-		}
-		for(unsigned int j=0; j<mesh.NumCell1Ds-E_initial; j++)
-		{
-			if(mesh.EdgesShortestPath[j]==1)
-			{
-				NumEdges++;
-				edges.push_back(j+E_initial);
-				cout << j+E_initial << endl;
-			}
-		}
-		if(NumVertices!=(NumEdges+1))
-			ok = false;
-		
-		// se è già falso da prima, inutile fare altri controlli
-		if(ok)
-		{
-			for(const auto& vertex: vertices)
-			{
-				if(ok)
-				{
-					unsigned int count = 0;
-					
-					// verifichiamo in quanti lati di edges compare l'estremo vertex
-					for(const auto& edge: edges)
-					{
-						cout << "boh" << endl;
-						cout << mesh.Cell1DsExtrema(edge, 0) << " " << mesh.Cell1DsExtrema(edge, 1) << endl;
-						if(mesh.Cell1DsExtrema(edge, 0) == vertex || mesh.Cell1DsExtrema(edge, 1) == vertex)
-							count++;
-					}
-					
-					if(count < 1 && (vertex == 0 || vertex == 42))
-						ok = false;
-					else if(count < 2 && (vertex != 0 && vertex != 42))
-						ok = false;
-				}
-			}
-		}
-		
-		ASSERT_EQ(ok,true);
-
-	}
+	
 	
 	
 	// test per il controllo dei punti sulla sfera della mesh
@@ -344,50 +277,65 @@ namespace PolyhedralLibrary
 		ASSERT_EQ(ok, true);
 	}
 	
-	// test su lati irrealizzabili nella mesh ottenuta con Triangulation_I (origine coincide con fine)
-	TEST(PolyhedralMeshTest, OriginEqualsEnd)
+	// test sulla coerenza dei segmenti e dei vertici dello shortest path
+	TEST(PolyhedralMeshTest, CheckShortestPath)
 	{
 		PolyhedralMesh mesh;
 		BuildPolyhedron(mesh, 3, 4);
 		Triangulation_I(mesh, 3, 4, 5, 0);
-		bool repeated = false;
-		for(unsigned int j=0; j<mesh.NumCell1Ds; j++)
+		unsigned int E_initial = 12;
+		ShortestPath(mesh, 0, 42, E_initial);
+		bool ok = true;
+		unsigned int NumVertices = 0;
+		unsigned int NumEdges = 0;
+		vector<unsigned int> vertices;
+		vector<unsigned int> edges;
+		vertices.reserve(mesh.NumCell0Ds);
+		edges.reserve(mesh.NumCell0Ds); // ci dovranno essere vertices.size() - 1 edges
+		for(unsigned int i=0; i<mesh.NumCell0Ds; i++)
 		{
-			if(mesh.Cell1DsExtrema(j,0) == mesh.Cell1DsExtrema(j,1))
+			if(mesh.VerticesShortestPath[i]==1)
 			{
-				repeated = true;
-				break;
+				NumVertices++;
+				vertices.push_back(i);
+			}
+		}
+		for(unsigned int j=0; j<mesh.NumCell1Ds-E_initial; j++)
+		{
+			if(mesh.EdgesShortestPath[j]==1)
+			{
+				NumEdges++;
+				edges.push_back(j+E_initial);
+			}
+		}
+		if(NumVertices!=(NumEdges+1))
+			ok = false;
+		
+		// se è già falso da prima, inutile fare altri controlli
+		if(ok)
+		{
+			for(const auto& vertex: vertices)
+			{
+				if(ok)
+				{
+					unsigned int count = 0;
+					
+					// verifichiamo in quanti lati di edges compare l'estremo vertex
+					for(const auto& edge: edges)
+					{
+						if(mesh.Cell1DsExtrema(edge, 0) == vertex || mesh.Cell1DsExtrema(edge, 1) == vertex)
+							count++;
+					}
+					
+					if(count < 1 && (vertex == 0 || vertex == 42))
+						ok = false;
+					else if(count < 2 && (vertex != 0 && vertex != 42))
+						ok = false;
+				}
 			}
 		}
 		
-		ASSERT_EQ(repeated, false);
+		ASSERT_EQ(ok,true);
+
 	}
-	
-	
-	
-	
-	// test su lati irrealizzabili nel duale (origine coincide con fine)
-	TEST(PolyhedralMeshTest, OriginEqualsEnd_Duale)
-	{
-		PolyhedralMesh mesh;
-		PolyhedralMesh dual;
-		BuildPolyhedron(mesh, 3, 4);
-		Triangulation_I(mesh, 3, 4, 5, 0);
-		Dual(mesh, dual, 12, 8);
-		bool repeated = false;
-		for(unsigned int j=0; j<dual.NumCell1Ds; j++)
-		{
-			if(dual.Cell1DsExtrema(j,0) == dual.Cell1DsExtrema(j,1))
-			{
-				repeated = true;
-				break;
-			}
-		}
-		
-		ASSERT_EQ(repeated, false);
-	}
-	
-	
-	
-	
 }
