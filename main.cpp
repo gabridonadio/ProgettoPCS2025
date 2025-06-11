@@ -24,7 +24,6 @@ int main(int argc, char *argv[])
 		{3,3}, {3,4}, {3,5}, {4,3}, {5,3}
 	};
 	
-	
     if(argc == 5)
     {
 		p = stoi(argv[1]);
@@ -43,8 +42,6 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 		
-		
-		
 		// Controllo sulla validità di b e c secondo le condizioni richieste
 		
 		if(!(b == c || b == 0 || c == 0)) {
@@ -58,8 +55,6 @@ int main(int argc, char *argv[])
 			cerr << "Invalid input: error in b,c" << endl;
 			return 3;
 		}
-			
-        
     }
     else if(argc==7)
 	{
@@ -81,7 +76,6 @@ int main(int argc, char *argv[])
 			return 4;
 		}
 		
-		
 		// Controllo sulla validità di b e c secondo le condizioni richieste
 		
 		if(!(b == c || b == 0 || c == 0)) {
@@ -95,8 +89,6 @@ int main(int argc, char *argv[])
 			cerr << "Invalid input: error in b,c" << endl;
 			return 6;
 		}
-		
-		
     }
 	else
 	{
@@ -110,13 +102,13 @@ int main(int argc, char *argv[])
 		return 8;
 	}
 	
-	
 	unsigned int T = b*b + b*c + c*c;
 	unsigned int V;
 	unsigned int E;
 	unsigned int F;
 	unsigned int E_initial;	
-	unsigned int F_initial ;
+	unsigned int F_initial;
+
 	if(p==3 && q==3)
 		{
 			V = 2*T + 2;
@@ -124,7 +116,6 @@ int main(int argc, char *argv[])
 			F = 4*T;
 			E_initial = 6;
 			F_initial = 4;
-			
 		}
 		
 		if((p==3 && q==4)||(p==4 && q==3))
@@ -145,12 +136,10 @@ int main(int argc, char *argv[])
 			F_initial = 20;
 		}
 		
-		
 	PolyhedralMesh mesh;
 	BuildPolyhedron(mesh, p, q);
 	if(max(b,c) != 1)
 		Triangulation_I(mesh, p, q, b, c);
-	
 	
 	Gedim::UCDUtilities utilities;
 	
@@ -174,19 +163,7 @@ int main(int argc, char *argv[])
 			else if(max(b,c)==1)
 			{
 				E_initial = 0;
-				cout << "before" << endl;
-				for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)
-				{
-					cout << mesh.Cell1DsExtrema(i,0) << ", " << mesh.Cell1DsExtrema(i,1) << endl;
-				}
-				cout << endl;
 				ShortestPath(mesh, id_origin, id_end, E_initial);
-				cout << "after" << endl;
-				for(unsigned int i = 0; i < mesh.NumCell1Ds; i++)
-				{
-					cout << mesh.Cell1DsExtrema(i,0) << ", " << mesh.Cell1DsExtrema(i,1) << endl;
-				}
-				cout << endl;
 			}
 			
 			VShortestPath.resize(1);
@@ -218,7 +195,6 @@ int main(int argc, char *argv[])
 			segments = mesh.Cell1DsExtrema.bottomRows(mesh.Cell1DsExtrema.rows()).transpose();
 		}
 		
-		
 		if(argc == 7)
 		{
 			utilities.ExportPoints("./Cell0Ds.inp", points, VShortestPath);
@@ -249,7 +225,6 @@ int main(int argc, char *argv[])
 		else
 			Dual(mesh, dual, 0, 0);
 		
-		cout << "ok" << endl;
 		if(argc == 7)
 		{		
 			if(id_origin < 0 || id_origin >= dual.NumCell0Ds || id_end < 0 || id_end >= dual.NumCell0Ds)
@@ -290,7 +265,6 @@ int main(int argc, char *argv[])
 		Eigen::MatrixXi segments;
 		segments = dual.Cell1DsExtrema.bottomRows(dual.Cell1DsExtrema.rows()).transpose();
 		
-		
 		if(argc == 7)
 		{
 			utilities.ExportPoints("./Cell0Ds.inp", points, VShortestPath);
@@ -306,10 +280,5 @@ int main(int argc, char *argv[])
 		F_initial = 0;
 		ExportMesh(dual, "./dual_", E_initial, F_initial);
 	}
-	
-	
-	
-
-	
 	return 0;
 }

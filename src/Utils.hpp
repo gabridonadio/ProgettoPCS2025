@@ -2,7 +2,6 @@
 #include <iostream>
 #include "PolyhedralMesh.hpp"
 
-
 namespace PolyhedralLibrary
 {
 	void BuildPolyhedron(PolyhedralMesh& mesh, const int p, const int q);

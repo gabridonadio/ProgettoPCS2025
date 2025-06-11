@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 namespace PolyhedralLibrary
 {
 	void BuildPolyhedron(PolyhedralMesh& mesh, const int p, const int q)
@@ -33,12 +32,6 @@ namespace PolyhedralLibrary
 				1,-1,-1;	
 				
 			mesh.Cell0DsCoordinates /= sqrt(3);
-
-			for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)  //Salvataggio dei marker
-				mesh.Cell0DsMarker[1].push_back(mesh.Cell0DsId[i]);
-
-			//for(int i = 0; i < mesh.NumCell0Ds; i++)
-				//cout << mesh.Cell0DsMarker[1][i] << endl;
 
 			//cell1Ds
 			mesh.NumCell1Ds = 6;
@@ -74,9 +67,6 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsEdges[1] = {2, 4, 0};
 			mesh.Cell2DsEdges[2] = {1, 5, 2};
 			mesh.Cell2DsEdges[3] = {4, 5, 3};
-					
-			for(unsigned int i = 0; i < mesh.NumCell2Ds; i++) //Salvataggio dei marker
-				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
 		}
 
 		// nel caso di ottaedro o cubo li tratto nello stesso modo, cioè come un ottaedro
@@ -99,9 +89,6 @@ namespace PolyhedralLibrary
 				0,-1, 0,
 				0, 0,-1;	
 
-			for(unsigned int i = 0; i < mesh.NumCell0Ds; i++) //Salvataggio dei marker
-				mesh.Cell0DsMarker[1].push_back(mesh.Cell0DsId[i]);
-			
 			//Cell1Ds
 			mesh.NumCell1Ds = 12;
 
@@ -150,9 +137,6 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsEdges[5] = {6, 9, 5};
 			mesh.Cell2DsEdges[6] = {7,10, 6};
 			mesh.Cell2DsEdges[7] = {4,11, 7};
-
-			for(unsigned int i = 0; i < mesh.NumCell2Ds; i++)
-				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
 		}
 		
 		// nel caso di icosaedro o dodecaedro li tratto nello stesso modo, cioè come un icosaedro
@@ -182,9 +166,6 @@ namespace PolyhedralLibrary
 				-1, -phi, 0; 
 				
 			mesh.Cell0DsCoordinates /= sqrt(1+phi*phi);
-
-			for(unsigned int i = 0; i < mesh.NumCell0Ds; i++) //Salvataggio dei marker
-				mesh.Cell0DsMarker[1].push_back(mesh.Cell0DsId[i]);
 
 			// cell1Ds
 			mesh.NumCell1Ds = 30;
@@ -277,9 +258,6 @@ namespace PolyhedralLibrary
 			mesh.Cell2DsEdges[17] = {23,25,22};
 			mesh.Cell2DsEdges[18] = {25,26,24};
 			mesh.Cell2DsEdges[19] = {26,29,27};
-
-			for(unsigned int i = 0; i < mesh.NumCell2Ds; i++) //Salvataggio dei marker
-				mesh.Cell2DsMarker[1].push_back(mesh.Cell2DsId[i]);
 		}
 	}
 	
@@ -297,7 +275,6 @@ namespace PolyhedralLibrary
 			V = 2*T + 2;
 			E = 6*T;
 			F = 4*T;
-			
 		}
 		
 		if((p==3 && q==4)||(p==4 && q==3))
@@ -314,7 +291,6 @@ namespace PolyhedralLibrary
 			F = 20*T;
 		}
 		
-		
 		mesh.Cell0DsId.reserve(V);
 		mesh.Cell1DsId.reserve(E+E/T);
 		mesh.Cell2DsId.reserve(F+F/T);
@@ -326,7 +302,6 @@ namespace PolyhedralLibrary
 		mesh.Cell2DsEdges.reserve(F+F/T);
 		
 		b = max(b,c);
-		
 
 		// salvare gli ID dei vertici che escono dalla suddivisione dei lati principali
 		array<vector<unsigned int>, 3> id_vertices_suddivisione;
@@ -339,11 +314,6 @@ namespace PolyhedralLibrary
 		unsigned int n = mesh.NumCell0Ds;
 		unsigned int m = mesh.NumCell1Ds;	// usato nella triangolazione
 		unsigned int f = mesh.NumCell2Ds;	// usato nella triangolazione
-		
-		//vector<unsigned int> v;
-
-		//mesh.Cell1DsMarker[3] = v;
-	
 
 		for(unsigned int face = 0; face < mesh.NumCell2Ds; face++)
 		{
@@ -359,11 +329,9 @@ namespace PolyhedralLibrary
 			vec.resize(b-1);
 			}
 			vertices_per_face.clear();
-
 			
 			for(unsigned int vertex = 0; vertex < 3; vertex++)
 			{
-				
 				// DIVIDO IL LATO
 				unsigned int vertex_origin_ID = mesh.Cell2DsVertices[face][vertex];
 				unsigned int vertex_end_ID = mesh.Cell2DsVertices[face][(vertex+1)%3];
@@ -385,11 +353,9 @@ namespace PolyhedralLibrary
 				// Creo i punti della triangolazione sui lati principali
 				// Cerco il lato di ID Cell2DsEdges[face][vertex] nel vettore associato al marker 2
 				auto iter_2DMark = find(mesh.Cell1DsMarker[2].begin(), mesh.Cell1DsMarker[2].end(), mesh.Cell2DsEdges[face][vertex]);
-				// iter_2DMark != mesh.Cell1DsMarker[2].end()
 				if (iter_2DMark != mesh.Cell1DsMarker[2].end()){
 					for(unsigned int i = 1; i < b; i++) 
 					{
-						//cout << "vertex" << vertex << endl;
 						double x_sudd = x_origin + vector_edge(0)*i;
 						double y_sudd = y_origin + vector_edge(1)*i;
 						double z_sudd = z_origin + vector_edge(2)*i;
@@ -469,7 +435,6 @@ namespace PolyhedralLibrary
 					
 					// memorizzazione lati
 					// creazione lato 0
-					//cout << "passo " << j << " lato 0" << endl;
 					mesh.Cell1DsExtrema(m, 0) = vert_0;
 					mesh.Cell1DsExtrema(m, 1) = vert_1;
 					unsigned int edge_0 = m;
@@ -484,7 +449,6 @@ namespace PolyhedralLibrary
 							{
 								edge_0 = iter;
 								found = true;
-					//			cout << iter << endl;
 							}
 						}
 						
@@ -492,18 +456,15 @@ namespace PolyhedralLibrary
 						{
 							mesh.Cell1DsMarker[3].push_back(m);
 							mesh.Cell1DsId.push_back(edge_0);
-					//		cout << m << endl;
 							m++;
 						}
 					}
 					else
 					{
 						mesh.Cell1DsId.push_back(edge_0);
-					//	cout << m << endl;
 						m++;
 					}
 					
-					//cout << "passo " << j << " lato 1" << endl;
 					// creazione lato 1
 					mesh.Cell1DsExtrema(m, 0) = vert_1;
 					mesh.Cell1DsExtrema(m, 1) = vert_2;
@@ -518,27 +479,22 @@ namespace PolyhedralLibrary
 							{
 								edge_1 = iter;
 								found = true;
-					//			cout << iter << endl;
 							}
 						}
 						if(not found)
 						{
 							mesh.Cell1DsMarker[3].push_back(m);
 							mesh.Cell1DsId.push_back(edge_1);
-					//		cout << m << endl;
 							m++;
-
 						}
 					}
 					else
 					{
 						mesh.Cell1DsId.push_back(edge_1);
-					//	cout << m << endl;
 						m++;
 					}
 					
 					// creazione lato 2
-					//cout << "passo " << j << " lato 2" << endl;
 					mesh.Cell1DsExtrema(m, 0) = vert_2;
 					mesh.Cell1DsExtrema(m, 1) = vert_0;
 					unsigned int edge_2 = m;
@@ -552,7 +508,6 @@ namespace PolyhedralLibrary
 							{
 								edge_2 = iter;
 								found = true;
-					//			cout << iter << endl;
 							}
 						}
 						
@@ -560,14 +515,12 @@ namespace PolyhedralLibrary
 						{
 							mesh.Cell1DsMarker[3].push_back(m);
 							mesh.Cell1DsId.push_back(edge_2);
-					//		cout << m << endl;
 							m++;
 						}
 					}
 					else
 					{
 						mesh.Cell1DsId.push_back(edge_2);
-					//	cout << m << endl;
 						m++;
 					}
 					
@@ -576,7 +529,6 @@ namespace PolyhedralLibrary
 					mesh.Cell2DsEdges[f] = {edge_0, edge_1, edge_2};
 					mesh.Cell2DsId.push_back(f);
 					f++;
-					
 				}
 			}
 			
@@ -615,24 +567,7 @@ namespace PolyhedralLibrary
 					
 				}
 			}
-			
-			/*for(unsigned int i = 0; i < 3; i++) {
-				cout << "id_vertices " << i << " " << endl;
-				for(unsigned int j = 0; j < b-1; j++)
-					cout << id_vertices_suddivisione[i][j] << ", " << endl; 
-			}*/
-			
-			
-			/*for(unsigned int i =0; i < b+1; i++){
-				cout << "vertices_per face " << i << " " << endl;
-				for(unsigned int j = 0; j <b+1-i; j++)
-					cout << vertices_per_face[i][j] << ", " << endl; 
-			}*/
-			
 		}
-		cout << "n: " << n << endl;
-		cout << "m: " << m << endl;
-		cout << "f: " << f << endl;
 		mesh.NumCell0Ds = n;
 		mesh.NumCell1Ds = m;
 		mesh.NumCell2Ds = f;
@@ -691,32 +626,13 @@ namespace PolyhedralLibrary
 		{
 			vector<unsigned int> neighbors;
 			neighbors.reserve(6); // massima valenza dei vertici è 6
-			/*const auto& key_edges = mesh.Cell2DsEdges[face];
-			unordered_set<unsigned int> to_be_found = {key_edges[0], key_edges[1], key_edges[2]};*/
-			// cerchiamo facce con vertex
 			
+			// cerchiamo facce con vertex
 			for(unsigned int face_ad = F_initial; face_ad < mesh.NumCell2Ds; face_ad++)
 			{
-				/*if(face_ad == face)
-					continue;*/
-				
-				/*if(neighbors.size() == 3)
-					break;*/
-				
 				const auto& iter_face = mesh.Cell2DsVertices[face_ad];
 				
 				// per ogni faccia itero sui vertici per vedere se c'è il vertice vertex
-				
-				/*
-				// LAMBDA FUNCTION
-				auto iter_edges = find_if(iter_face.begin(), iter_face.end(), [&](int id_edge) {
-				return to_be_found.count(id_edge) > 0;
-				});
-				if(iter_edges!=iter_face.end())
-				{
-					neighbors.push_back(face_ad);
-				}*/
-				
 				auto iter_vertices = find(iter_face.begin(), iter_face.end(), vertex);
 				if(iter_vertices!=iter_face.end())
 				{
@@ -726,7 +642,6 @@ namespace PolyhedralLibrary
 			
 			neighborhood_faces[vertex] = neighbors;
 		}
-		
 		
 		for(unsigned int vertex = 0; vertex < mesh.NumCell0Ds; vertex++)
 		{
@@ -743,21 +658,16 @@ namespace PolyhedralLibrary
 			
 			int id_past = -1;
 			for(unsigned int face = 0; face < neighborhood_faces[vertex].size(); face++)
-			{
-				//cout << "face " << face << endl;
-				
+			{				
 				vector<unsigned int> edges_face = mesh.Cell2DsEdges[iter_face];
-				//cout << "iterface " << iter_face << endl;
 				
 				bool found = false;
 				for(const auto& iter_face_ad: neighborhood_faces[vertex])
 				{
 					if(found)
 						break;
-					//cout<< "iter_face_ad " << iter_face_ad << endl;
 					if(iter_face_ad == iter_face || iter_face_ad == id_past)
 						continue;
-					//cout << "hey" << endl;
 					
 					vector<unsigned int> edges_face_ad = mesh.Cell2DsEdges[iter_face_ad];
 					
@@ -770,15 +680,11 @@ namespace PolyhedralLibrary
 							found = true;
 							new_face_ad = iter_face_ad;
 							if(face < neighborhood_faces[vertex].size()-1)
-								vertices.push_back(new_face_ad-F_initial);
-							//cout << new_face_ad-F_initial << endl;
-							
+								vertices.push_back(new_face_ad-F_initial);							
 						}
 					}
 				}
-					
-					
-					
+	
 				bool find = false;
 				unsigned int edge_0 = m;
 				unsigned int vert_0 = iter_face-F_initial;
@@ -806,7 +712,6 @@ namespace PolyhedralLibrary
 				
 				edges.push_back(edge_0);
 					
-				
 				id_past = iter_face;
 				iter_face = new_face_ad;
 				
@@ -815,117 +720,114 @@ namespace PolyhedralLibrary
 			dual.Cell2DsVertices[vertex] = vertices;
 			dual.Cell2DsEdges[vertex] = edges;
 		}		
-		
 	}
 
 	void ExportMesh(PolyhedralMesh& mesh, string basePath, const unsigned int E_initial, const unsigned int F_initial) 
 	{
-    // Export Cell0Ds
-    ofstream cell0DsFile(basePath + "Cell0Ds.txt");
-    if (!cell0DsFile.is_open()) 
-	{
-        cerr << "Error opening Cell0Ds.txt" << endl;
-        return;
-    }
-    cell0DsFile << "Id;X;Y;Z" << endl;
-    for (unsigned int i = 0; i < mesh.NumCell0Ds; i++) 
-	{
-        cell0DsFile << mesh.Cell0DsId[i] << ";"
-                    << fixed << setprecision(12) << mesh.Cell0DsCoordinates(i, 0) << ";"
-                    << mesh.Cell0DsCoordinates(i, 1) << ";"
-                    << mesh.Cell0DsCoordinates(i, 2) << endl;
-    }
-    cell0DsFile.close();
-
-    // Export Cell1Ds
-    ofstream cell1DsFile(basePath + "Cell1Ds.txt");
-    if (!cell1DsFile.is_open()) 
-	{
-        cerr << "Error opening Cell1Ds.txt" << endl;
-        return;
-    }
-    cell1DsFile << "Id;Origin;End" << endl;
-    for (unsigned int i = E_initial; i < mesh.NumCell1Ds; i++) 
-	{
-        cell1DsFile << mesh.Cell1DsId[i] << ";"
-                    << mesh.Cell1DsExtrema(i, 0) << ";"
-                    << mesh.Cell1DsExtrema(i, 1) << endl;
-    }
-    cell1DsFile.close();
-
-    // Export Cell2Ds
-    ofstream cell2DsFile(basePath + "Cell2Ds.txt");
-    if (!cell2DsFile.is_open()) 
-	{
-        cerr << "Error opening Cell2Ds.txt" << endl;
-        return;
-    }
-    cell2DsFile << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;
-    for (unsigned int i = 0; i < mesh.NumCell2Ds; i++) 
-	{
-        cell2DsFile << mesh.Cell2DsId[i] << ";"
-                    << mesh.Cell2DsVertices[i].size() << ";";
-        // Vertici
-        for (size_t j = E_initial; j < mesh.Cell2DsVertices[i].size(); j++) 
+		// Export Cell0Ds
+		ofstream cell0DsFile(basePath + "Cell0Ds.txt");
+		if (!cell0DsFile.is_open()) 
 		{
-            cell2DsFile << mesh.Cell2DsVertices[i][j];
-            if (j != mesh.Cell2DsVertices[i].size() - 1)
-                cell2DsFile << ",";
-        }
-        cell2DsFile << ";"
-                    << mesh.Cell2DsEdges[i].size() << ";";
-        // Lati
-        for (size_t j = F_initial; j < mesh.Cell2DsEdges[i].size(); j++) 
+			cerr << "Error opening Cell0Ds.txt" << endl;
+			return;
+		}
+		cell0DsFile << "Id;X;Y;Z" << endl;
+		for (unsigned int i = 0; i < mesh.NumCell0Ds; i++) 
 		{
-            cell2DsFile << mesh.Cell2DsEdges[i][j];
-            if (j != mesh.Cell2DsEdges[i].size() - 1)
-                cell2DsFile << ",";
-        }
-        cell2DsFile << endl;
-    }
-    cell2DsFile.close();
+			cell0DsFile << mesh.Cell0DsId[i] << ";"
+						<< fixed << setprecision(12) << mesh.Cell0DsCoordinates(i, 0) << ";"
+						<< mesh.Cell0DsCoordinates(i, 1) << ";"
+						<< mesh.Cell0DsCoordinates(i, 2) << endl;
+		}
+		cell0DsFile.close();
 
-    // Export Cell3Ds
-    ofstream cell3DsFile(basePath + "Cell3Ds.txt");
-    if (!cell3DsFile.is_open()) 
-	{
-        cerr << "Error opening Cell3Ds.txt" << endl;
-        return;
-    }
-    cell3DsFile << "Id;NumVertices;Vertices;NumEdges;Edges;NumFaces;Faces" << endl;
-	cell3DsFile << 1 << ";";
-	// Vertici
-	cell3DsFile << mesh.NumCell0Ds << ";";
-	for(size_t j = 0; j < mesh.NumCell0Ds; j++)
-	{
-		cell3DsFile << mesh.Cell0DsId[j];
-		if(j != mesh.NumCell0Ds-1) 
-			cell3DsFile << ",";
+		// Export Cell1Ds
+		ofstream cell1DsFile(basePath + "Cell1Ds.txt");
+		if (!cell1DsFile.is_open()) 
+		{
+			cerr << "Error opening Cell1Ds.txt" << endl;
+			return;
+		}
+		cell1DsFile << "Id;Origin;End" << endl;
+		for (unsigned int i = E_initial; i < mesh.NumCell1Ds; i++) 
+		{
+			cell1DsFile << mesh.Cell1DsId[i] << ";"
+						<< mesh.Cell1DsExtrema(i, 0) << ";"
+						<< mesh.Cell1DsExtrema(i, 1) << endl;
+		}
+		cell1DsFile.close();
+
+		// Export Cell2Ds
+		ofstream cell2DsFile(basePath + "Cell2Ds.txt");
+		if (!cell2DsFile.is_open()) 
+		{
+			cerr << "Error opening Cell2Ds.txt" << endl;
+			return;
+		}
+		cell2DsFile << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;
+		for (unsigned int i = F_initial; i < mesh.NumCell2Ds; i++) 
+		{
+			cell2DsFile << mesh.Cell2DsId[i] << ";"
+						<< mesh.Cell2DsVertices[i].size() << ";";
+			// Vertici
+			for (size_t j = 0; j < mesh.Cell2DsVertices[i].size(); j++) 
+			{
+				cell2DsFile << mesh.Cell2DsVertices[i][j];
+				if (j != mesh.Cell2DsVertices[i].size() - 1)
+					cell2DsFile << ",";
+			}
+			cell2DsFile << ";"
+						<< mesh.Cell2DsEdges[i].size() << ";";
+			// Lati
+			for (size_t j = 0; j < mesh.Cell2DsEdges[i].size(); j++) 
+			{
+				cell2DsFile << mesh.Cell2DsEdges[i][j];
+				if (j != mesh.Cell2DsEdges[i].size() - 1)
+					cell2DsFile << ",";
+			}
+			cell2DsFile << endl;
+		}
+		cell2DsFile.close();
+
+		// Export Cell3Ds
+		ofstream cell3DsFile(basePath + "Cell3Ds.txt");
+		if (!cell3DsFile.is_open()) 
+		{
+			cerr << "Error opening Cell3Ds.txt" << endl;
+			return;
+		}
+		cell3DsFile << "Id;NumVertices;Vertices;NumEdges;Edges;NumFaces;Faces" << endl;
+		cell3DsFile << 1 << ";";
+		// Vertici
+		cell3DsFile << mesh.NumCell0Ds << ";";
+		for(size_t j = 0; j < mesh.NumCell0Ds; j++)
+		{
+			cell3DsFile << mesh.Cell0DsId[j];
+			if(j != mesh.NumCell0Ds-1) 
+				cell3DsFile << ",";
+		}
+		cell3DsFile << ";";
+		// Lati
+		cell3DsFile << mesh.NumCell1Ds << ";";
+		for(size_t j = E_initial; j < mesh.NumCell1Ds; j++)
+		{
+			cell3DsFile << mesh.Cell1DsId[j];
+			if(j != mesh.NumCell1Ds - 1) 
+				cell3DsFile << ",";
+		}
+		cell3DsFile << ";";
+		// Facce
+		cell3DsFile << mesh.NumCell2Ds << ";";
+		for(size_t j = F_initial; j < mesh.NumCell2Ds; j++)
+		{
+			cell3DsFile << mesh.Cell2DsId[j];
+			if(j != mesh.NumCell2Ds - 1)
+				cell3DsFile << ",";
+		} 
+		cell3DsFile<< ";";
+		cell3DsFile.close();
 	}
-	cell3DsFile << ";";
-	// Lati
-	cell3DsFile << mesh.NumCell1Ds << ";";
-	// DA SISTEMARE, CI SONO DUPLICATI NEGLI EDGES, A PARTIRE DA 13
-	for(size_t j = E_initial; j < mesh.NumCell1Ds; j++)
-	{
-		cell3DsFile << mesh.Cell1DsId[j];
-		cout << mesh.Cell1DsId[j] << endl;
-		if(j != mesh.NumCell1Ds - 1) 
-			cell3DsFile << ",";
-	}
-	cell3DsFile << ";";
-	// Facce
-	cell3DsFile << mesh.NumCell2Ds << ";";
-	for(size_t j = F_initial; j < mesh.NumCell2Ds; j++)
-	{
-		cell3DsFile << mesh.Cell2DsId[j];
-		if(j != mesh.NumCell2Ds - 1)
-			cell3DsFile << ",";
-	} 
-	cell3DsFile<< ";";
-    cell3DsFile.close();
-	}
-	
+		
 	void SphereProjection(PolyhedralMesh& mesh)
 	{
 		for (unsigned int i=0; i<mesh.NumCell0Ds; i++)
@@ -964,14 +866,6 @@ namespace PolyhedralLibrary
 			
 			LA[i] = list_ad;
 		}
-		
-		/*cout << "LA" << endl;
-		for(unsigned int i = 0; i < n; i++)
-		{
-			for(const auto& it: LA[i])
-				cout << it << " ";
-			cout << endl;
-		}*/
 		
 		// BFS
 		vector<bool> reached(n);
@@ -1017,7 +911,6 @@ namespace PolyhedralLibrary
 				found = true;
 		}
 		
-		
 		// salvare il percorso in mesh
 		mesh.VerticesShortestPath.resize(mesh.NumCell0Ds);
 		for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)
@@ -1051,8 +944,6 @@ namespace PolyhedralLibrary
 			}
 			
 			vert_0 = vert_1;
-			
 		}
 	}
-	
 }

@@ -8,7 +8,6 @@
 
 namespace PolyhedralLibrary
 {
-	
 	// test per la correttezza dei poliedri creati con BuildPolyhedron
 	TEST(PolyhedralMeshTest, NoRepeatedVerticesPerFace)
 	{
@@ -45,7 +44,6 @@ namespace PolyhedralLibrary
 		
 	}
 	
-	
 	TEST(PolyhedralMeshTest, NoRepeatedEdgesPerFace)
 	{
 		PolyhedralMesh mesh;
@@ -80,7 +78,6 @@ namespace PolyhedralLibrary
 		ASSERT_EQ(repeated, false);
 		
 	}
-	
 	
 	// test per la correttezza dei poliedri che derivano da Triangulation_I
 	TEST(PolyhedralMeshTest, NoRepeatedVerticesPerFace_Triangulation)
@@ -119,7 +116,6 @@ namespace PolyhedralLibrary
 		
 	}
 	
-	
 	TEST(PolyhedralMeshTest, NoRepeatedEdgesPerFace_Triangulation)
 	{
 		PolyhedralMesh mesh;
@@ -155,9 +151,7 @@ namespace PolyhedralLibrary
 		ASSERT_EQ(repeated, false);
 		
 	}
-	
-	
-	
+
 	// test sul numero di vertici, lati e facce della mesh che deriva da Triangulation_I
 	TEST(PolyhedralMeshTest, NumVertices_Triangulation)
 	{
@@ -204,7 +198,6 @@ namespace PolyhedralLibrary
 		ASSERT_EQ(ok, true);
 	}
 	
-	
 	// test sulla valenza dei vertici della mesh ottenuta con Triangulation_I
 	TEST(PolyhedralMeshTest, ValenceVertices)
 	{
@@ -241,9 +234,6 @@ namespace PolyhedralLibrary
 		ASSERT_EQ(NumLowValence, NumLowValence_Teo);
 		ASSERT_EQ(NumHighValence, NumHighValence_Teo);
 	}
-	
-	
-	
 	
 	// test per il controllo dei punti sulla sfera della mesh
 	TEST(PolyhedralMeshTest, NormalizedVertices)
@@ -336,6 +326,5 @@ namespace PolyhedralLibrary
 		}
 		
 		ASSERT_EQ(ok,true);
-
 	}
 }
