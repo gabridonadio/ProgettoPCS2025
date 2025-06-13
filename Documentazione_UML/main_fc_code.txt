@@ -1,0 +1,19 @@
+@startuml
+
+
+start
+
+:read the input arguments;
+if (input is valid?) then (yes)
+  :call BuildPolyhedron;
+  :call Triangulation_I;
+  :call Dual;
+  :call SphereProjection;
+  :call ExportMesh;
+  :call ShortestPath;
+else (no)
+  :print error;
+endif
+
+stop
+@enduml

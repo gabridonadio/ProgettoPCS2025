@@ -1,0 +1,15 @@
+@startuml
+
+
+start
+
+:run all tests;
+:check polyhedron created with BuildPolyhedron;
+:check polyhedron created with Triangulation_I;
+:check number of vertices, edges and faces;
+:check valence of vertices;
+:check if projection is correct;
+:check consistency of shortest path;
+
+stop
+@enduml

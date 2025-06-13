@@ -1,0 +1,7 @@
+@startuml
+
+
+class "LA" <<vector<list<unsigned int>>>>
+class "VerticesShortestPath" <<vector<double>>>
+class "EdgesShortestPath" <<vector<double>>>
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+
+
+skinparam classAttributeIconSize 0
+
+class "PolyhedralMesh" <<struct>> {
+  + NumCell0Ds: unsigned int
+  + NumCell1Ds: unsigned int
+  + NumCell2Ds: unsigned int
+  + Cell0DsId: vector<unsigned int>
+  + Cell1DsId: vector<unsigned int>
+  + Cell2DsId: vector<unsigned int>
+  + Cell3DsId: vector<unsigned int>
+  + Cell1DsMarker: map<unsigned int, unsigned int>
+  + Cell0DsCoordinates: MatrixXd
+  + Cell1DsExtrema: MatrixXi
+  + Cell2DsVertices: vector<vector<unsigned int>>
+  + Cell2DsEdges: vector<vector<unsigned int>>
+  + VerticesShortestPath: vector<double>
+  + EdgesShortestPath: vector<double>
+}
+
+class "PolyhedralLibrary" <<library>> {
+  + BuildPolyhedron(PolyhedralMesh& mesh, const int p, const int q)
+  + Triangulation_I(PolyhedralMesh& mesh, const int p, const int q, int b, int c)
+  + Dual(PolyhedralMesh& mesh, PolyhedralMesh& dual, const unsigned int E_initial, const unsigned int F_initial)
+  + SphereProjection(PolyhedralMesh& mesh)
+  + ExportMesh(PolyhedralMesh& mesh, string basePath, const unsigned int E_initial, const unsigned int F_initial)
+  + ShortestPath(PolyhedralMesh& mesh, const int id_origin, const int id_end, const unsigned int E_initial)
+}
+
+note bottom of "PolyhedralLibrary"
+Variables:
+- "p", "q": <<solid parameters>>
+- "b", "c": <<triangulation parameters>>
+- "mesh": <<input polyhedral mesh>>
+- "dual": <<polyhedral dual>>
+- "E_initial", "F_initial": <<initial edges and faces>>
+- "id_origin", "id_end": <<path points>>
+
+end note
+@enduml

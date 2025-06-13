@@ -1,0 +1,23 @@
+@startuml
+
+
+start
+
+:subdivision for the main edges;
+:creation of new vertices;
+note right
+update map: vertices_per_face
+(key: height of triangle,
+value: new edges id)
+end note
+:check to avoid duplicated vertices;
+
+
+
+:creation of new edges and faces (first part);
+:check to avoid duplicated edges;
+:creation of new faces (second part);
+:recover old edges;
+
+stop
+@enduml

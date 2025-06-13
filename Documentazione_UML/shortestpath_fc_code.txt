@@ -1,0 +1,20 @@
+@startuml
+
+start
+
+:creation of the adjacency list;
+note right
+  LA : vector<list<unsigned int>>
+end note
+
+:use BFS algorithm to find shortest path;
+:rebuild the path backwards;
+
+:save the path;
+note right
+  - VerticesShortestPath (vector<double>)
+  - EdgesShortestPath (vector<double>)
+end note
+
+stop
+@enduml

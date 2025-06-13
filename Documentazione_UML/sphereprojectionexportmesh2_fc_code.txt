@@ -1,0 +1,12 @@
+@startuml
+
+
+start
+
+:project each vertex on the unit sphere;
+:overwrite the coordinates;
+
+stop
+
+
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+
+
+class "neighborhood_faces" <<map>> {
+  + key: old vertex id
+  + value: faces around the old vertex
+}
+@enduml

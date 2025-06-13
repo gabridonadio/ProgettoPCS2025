@@ -1,0 +1,16 @@
+@startuml
+
+
+class "main" <<function>> {
+  + argc: int
+  + *argv[]: char
+}
+note bottom of "main"
+
+"argc" <<parameter>>
+"*argv[]" <<parameter>>
+
+end note
+
+@enduml
+

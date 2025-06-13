@@ -1,0 +1,35 @@
+@startuml
+
+
+start
+
+:project each vertex on the unit sphere;
+:normalize the edges;
+:overwrite the coordinates;
+
+
+  :export vertices;
+  note right
+  Output file:
+  - Cell0Ds.txt
+  end note
+  :export edges;
+  note right
+  Output file:
+  - Cell1Ds.txt
+  end note
+  :export faces;
+  note right
+  Output file:
+  - Cell2Ds.txt
+  end note
+  :export polyhedron;
+  note right
+  Output file:
+  - Cell3Ds.txt
+  end note
+
+
+
+stop
+@enduml

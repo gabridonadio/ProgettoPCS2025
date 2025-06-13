@@ -1,0 +1,18 @@
+@startuml
+
+start
+
+:compute the barycenters and create new vertices;
+:choose which barycenters need to be connected;
+
+note right
+update map: neighborhood_faces
+(key:old vertex id,
+value: faces around it)
+end note
+
+:creation of new edges and faces;
+:check to avoid duplicated edges;
+
+stop
+@enduml
