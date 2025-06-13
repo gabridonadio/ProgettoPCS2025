@@ -321,7 +321,6 @@ namespace PolyhedralLibrary
 			// salvare le 3 direzioni del triangolo
 			Eigen::Matrix3d matrix_edges;
 			
-			// puzza
 			for (auto& vec : id_vertices_suddivisione) {
 				vec.clear();
 			}
@@ -563,8 +562,6 @@ namespace PolyhedralLibrary
 					mesh.Cell2DsEdges[f] = {edge_0c, edge_1c, edge_2c};
 					mesh.Cell2DsId.push_back(f);
 					f++;
-					
-					
 				}
 			}
 		}
@@ -654,9 +651,11 @@ namespace PolyhedralLibrary
 			
 			dual.Cell2DsId.push_back(f);
 			f++;
-			unsigned int new_face_ad;
 			
+			unsigned int new_face_ad;
 			int id_past = -1;
+
+			// Visitiamo le facce del vicinato evitando le ripetizioni e salviamo gli ID dei vertici della faccia 
 			for(unsigned int face = 0; face < neighborhood_faces[vertex].size(); face++)
 			{				
 				vector<unsigned int> edges_face = mesh.Cell2DsEdges[iter_face];
@@ -671,6 +670,7 @@ namespace PolyhedralLibrary
 					
 					vector<unsigned int> edges_face_ad = mesh.Cell2DsEdges[iter_face_ad];
 					
+					// Controliamo se i lati della faccia adiacente sono già presenti 
 					for(const auto& it: edges_face_ad)
 					{
 						
@@ -700,7 +700,7 @@ namespace PolyhedralLibrary
 					}
 				}
 				
-				if(not find) //aggiunto controllo su m
+				if(not find)
 				{
 					dual.Cell1DsId.push_back(edge_0);
 					// baricentro di faccia iter_face è iter_face-F_initial
@@ -711,10 +711,8 @@ namespace PolyhedralLibrary
 				}
 				
 				edges.push_back(edge_0);
-					
 				id_past = iter_face;
 				iter_face = new_face_ad;
-				
 			}
 			
 			dual.Cell2DsVertices[vertex] = vertices;
@@ -797,7 +795,7 @@ namespace PolyhedralLibrary
 			return;
 		}
 		cell3DsFile << "Id;NumVertices;Vertices;NumEdges;Edges;NumFaces;Faces" << endl;
-		cell3DsFile << 1 << ";";
+		cell3DsFile << mesh.Cell3DsId[0] << ";";
 		// Vertici
 		cell3DsFile << mesh.NumCell0Ds << ";";
 		for(size_t j = 0; j < mesh.NumCell0Ds; j++)
