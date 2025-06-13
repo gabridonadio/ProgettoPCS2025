@@ -41,7 +41,7 @@ list(APPEND ${PROJECT_NAME}_LINKED_LIBRARIES PRIVATE GTest::gmock_main)
 # message(${CMAKE_CURRENT_SOURCE_DIR})
 # message(${CMAKE_BINARY_DIR})
 # message(${CMAKE_CURRENT_BINARY_DIR})
-# message(${PROJECT_NAME})
+# message(${PROJECT_NAME}) 
 # message(${CMAKE_PROJECT_NAME})
 
 ###################### Add subdirectory ##################################
