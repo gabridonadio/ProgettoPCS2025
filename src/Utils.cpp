@@ -908,6 +908,8 @@ namespace PolyhedralLibrary
 				found = true;
 		}
 		
+		cout << "Numero di archi: " << path.size()-1 << endl;
+		
 		// salvare il percorso in mesh
 		mesh.VerticesShortestPath.resize(mesh.NumCell0Ds);
 		for(unsigned int i = 0; i < mesh.NumCell0Ds; i++)
