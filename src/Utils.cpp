@@ -877,7 +877,6 @@ namespace PolyhedralLibrary
 			reached[i] = false;
 			pred[i] = -1;
 		}
-		
 		Q.push(id_origin);
 		pred[id_origin] = id_origin;
 		while(not Q.empty() && not reached[id_end])
